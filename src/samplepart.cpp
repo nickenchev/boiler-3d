@@ -17,17 +17,23 @@ void SamplePart::onStart()
 	EntityComponentSystem &ecs = engine.getEcs();
 
 	VertexData vertData{{
-			{-0.5f, -0.5f, 0.0f},
-			{0.5f, -0.5f, 0.0f},
-			{0.0f,  0.5f, 0.0f}
+			{-0.5f, -0.5f, 0},
+			{0.5f, -0.5f, 0},
+			{0.0f,  0.5f, 0}
 		}};
 
-	Entity object = ecs.newEntity();
+	object = ecs.newEntity();
 	auto renderComp = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData));
 	renderComp->colour = Colour::fromRGBA(252, 171, 20, 255);
-	ecs.createComponent<PositionComponent>(object, Rect(0, 0, 0, 0));
+	auto renderPos = ecs.createComponent<PositionComponent>(object, Rect(0, 0, 0, 0));
+	renderPos->rotationAxis = glm::vec3(0, 1, 0);
 }
 
 void SamplePart::update(double deltaTime)
 {
+	Engine &engine = Engine::getInstance();
+	EntityComponentSystem &ecs = engine.getEcs();
+
+	PositionComponent &pos = ecs.getComponentStore().retrieve<PositionComponent>(object);
+	pos.rotationAngle += 45.0f * deltaTime;
 }

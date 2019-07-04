@@ -6,6 +6,7 @@
 
 class SamplePart : public Boiler::Part
 {
+	Boiler::Entity object;
 	
 public:
     SamplePart();
