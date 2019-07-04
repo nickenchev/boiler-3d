@@ -16,11 +16,49 @@ void SamplePart::onStart()
 	Engine &engine = Engine::getInstance();
 	EntityComponentSystem &ecs = engine.getEcs();
 
-	VertexData vertData{{
-			{-0.5f, -0.5f, 0},
-			{0.5f, -0.5f, 0},
-			{0.0f,  0.5f, 0}
-		}};
+	VertexData vertData({
+		{ -0.5f, -0.5f, -0.5f },
+		{ 0.5f, -0.5f, -0.5f },
+		{ 0.5f,  0.5f, -0.5f },
+		{ 0.5f,  0.5f, -0.5f },
+		{ -0.5f,  0.5f, -0.5f },
+		{ -0.5f, -0.5f, -0.5f },
+
+		{ -0.5f, -0.5f,  0.5f },
+		{ 0.5f, -0.5f,  0.5f },
+		{ 0.5f,  0.5f,  0.5f },
+		{ 0.5f,  0.5f,  0.5f },
+		{ -0.5f,  0.5f,  0.5f },
+		{ -0.5f, -0.5f,  0.5f },
+
+		{ -0.5f,  0.5f,  0.5f },
+		{ -0.5f,  0.5f, -0.5f },
+		{ -0.5f, -0.5f, -0.5f },
+		{ -0.5f, -0.5f, -0.5f },
+		{ -0.5f, -0.5f,  0.5f },
+		{ -0.5f,  0.5f,  0.5f },
+
+		{ 0.5f,  0.5f,  0.5f },
+		{ 0.5f,  0.5f, -0.5f },
+		{ 0.5f, -0.5f, -0.5f },
+		{ 0.5f, -0.5f, -0.5f },
+		{ 0.5f, -0.5f,  0.5f },
+		{ 0.5f,  0.5f,  0.5f },
+
+		{ -0.5f, -0.5f, -0.5f },
+		{ 0.5f, -0.5f, -0.5f },
+		{ 0.5f, -0.5f,  0.5f },
+		{ 0.5f, -0.5f,  0.5f },
+		{ -0.5f, -0.5f,  0.5f },
+		{ -0.5f, -0.5f, -0.5f },
+
+		{ -0.5f,  0.5f, -0.5f },
+		{ 0.5f,  0.5f, -0.5f },
+		{ 0.5f,  0.5f,  0.5f },
+		{ 0.5f,  0.5f,  0.5f },
+		{ -0.5f,  0.5f,  0.5f },
+		{ -0.5f,  0.5f, -0.5f }
+	});
 
 	object = ecs.newEntity();
 	auto renderComp = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData));
