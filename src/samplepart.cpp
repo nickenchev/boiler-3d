@@ -13,6 +13,7 @@ SamplePart::SamplePart() : Part("Sample")
 
 void SamplePart::onStart()
 {
+	/*
 	Engine &engine = Engine::getInstance();
 	EntityComponentSystem &ecs = engine.getEcs();
 
@@ -60,6 +61,7 @@ void SamplePart::onStart()
 		{ -0.5f,  0.5f, -0.5f }
 	});
 
+	*/
 	/*
 	object = ecs.newEntity();
 	auto renderComp = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData));
