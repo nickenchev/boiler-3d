@@ -6,10 +6,13 @@
 
 int main(int argc, char *argv[])
 {
-	Boiler::Engine::getInstance().initialize(std::make_unique<Boiler::VulkanRenderer>(), 1024, 768);
+	Boiler::VulkanRenderer renderer;
+	Boiler::Engine engine(renderer);
+
+	engine.initialize(1024, 768);
 
 	auto part = std::make_shared<SamplePart>();
-	Boiler::Engine::getInstance().start(part);
+	engine.start(part);
 
 	return 0;
 }
