@@ -10,6 +10,8 @@ int main(int argc, char *argv[])
     
 	Boiler::Engine engine(*renderer);
 	engine.initialize(1024, 768);
+
+	// create the part and start it
 	auto part = std::make_shared<SamplePart>();
 	engine.start(part);
 

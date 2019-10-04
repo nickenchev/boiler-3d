@@ -11,7 +11,7 @@ class SamplePart : public Boiler::Part
 public:
     SamplePart();
 
-    void onStart() override;
+    void onStart(Boiler::Engine &engine) override;
     void update(double deltaTime) override;
 };
 
