@@ -11,7 +11,7 @@ SamplePart::SamplePart() : Part("Sample")
 {
 }
 
-void SamplePart::onStart()
+void SamplePart::onStart(Engine &engine)
 {
 	/*
 	Engine &engine = Engine::getInstance();
