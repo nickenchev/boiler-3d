@@ -14,7 +14,6 @@ SamplePart::SamplePart() : Part("Sample")
 void SamplePart::onStart(Engine &engine)
 {
 	/*
-	Engine &engine = Engine::getInstance();
 	EntityComponentSystem &ecs = engine.getEcs();
 
 	VertexData vertData({
@@ -61,8 +60,6 @@ void SamplePart::onStart(Engine &engine)
 		{ -0.5f,  0.5f, -0.5f }
 	});
 
-	*/
-	/*
 	object = ecs.newEntity();
 	auto renderComp = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData));
 	renderComp->colour = Colour::fromRGBA(252, 171, 20, 255);
