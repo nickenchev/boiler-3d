@@ -1,3 +1,4 @@
+#include <array>
 #include <glm/glm.hpp>
 #include "samplepart.h"
 #include "core/entitycomponentsystem.h"
@@ -13,69 +14,56 @@ SamplePart::SamplePart() : Part("Sample")
 
 void SamplePart::onStart(Engine &engine)
 {
-	/*
-	VertexData vertData({
-		{ -0.5f, -0.5f, -0.5f },
-		{ 0.5f, -0.5f, -0.5f },
-		{ 0.5f,  0.5f, -0.5f },
-		{ 0.5f,  0.5f, -0.5f },
-		{ -0.5f,  0.5f, -0.5f },
-		{ -0.5f, -0.5f, -0.5f },
+	std::array<float, 108> verts = {
+		-1.0f,-1.0f,-1.0f, // triangle 1 : begin
+		-1.0f,-1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f, // triangle 1 : end
+		1.0f, 1.0f,-1.0f, // triangle 2 : begin
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f,-1.0f, // triangle 2 : end
+		1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f,-1.0f,
+		1.0f,-1.0f,-1.0f,
+		1.0f, 1.0f,-1.0f,
+		1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f,-1.0f,
+		1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f,-1.0f, 1.0f,
+		1.0f,-1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f,-1.0f,-1.0f,
+		1.0f, 1.0f,-1.0f,
+		1.0f,-1.0f,-1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f,-1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f,-1.0f,
+		-1.0f, 1.0f,-1.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f,-1.0f, 1.0f
+	};
 
-		{ -0.5f, -0.5f,  0.5f },
-		{ 0.5f, -0.5f,  0.5f },
-		{ 0.5f,  0.5f,  0.5f },
-		{ 0.5f,  0.5f,  0.5f },
-		{ -0.5f,  0.5f,  0.5f },
-		{ -0.5f, -0.5f,  0.5f },
-
-		{ -0.5f,  0.5f,  0.5f },
-		{ -0.5f,  0.5f, -0.5f },
-		{ -0.5f, -0.5f, -0.5f },
-		{ -0.5f, -0.5f, -0.5f },
-		{ -0.5f, -0.5f,  0.5f },
-		{ -0.5f,  0.5f,  0.5f },
-
-		{ 0.5f,  0.5f,  0.5f },
-		{ 0.5f,  0.5f, -0.5f },
-		{ 0.5f, -0.5f, -0.5f },
-		{ 0.5f, -0.5f, -0.5f },
-		{ 0.5f, -0.5f,  0.5f },
-		{ 0.5f,  0.5f,  0.5f },
-
-		{ -0.5f, -0.5f, -0.5f },
-		{ 0.5f, -0.5f, -0.5f },
-		{ 0.5f, -0.5f,  0.5f },
-		{ 0.5f, -0.5f,  0.5f },
-		{ -0.5f, -0.5f,  0.5f },
-		{ -0.5f, -0.5f, -0.5f },
-
-		{ -0.5f,  0.5f, -0.5f },
-		{ 0.5f,  0.5f, -0.5f },
-		{ 0.5f,  0.5f,  0.5f },
-		{ 0.5f,  0.5f,  0.5f },
-		{ -0.5f,  0.5f,  0.5f },
-		{ -0.5f,  0.5f, -0.5f }
-	});
-	*/
+	VertexData vertData(verts);
 
 	this->engine = &engine;
 	engine.getRenderer().setClearColor({0, 0, 0});
-
-	VertexData vertData({
-		{ -0.5f, -0.5f, 0 },
-		{ 0.5f, -0.5f, 0 },
-		{ 0.5f,  0.5f, 0 },
-		{ 0.5f,  0.5f, 0 },
-		{ -0.5f,  0.5f, 0 },
-		{ -0.5f, -0.5f, 0 },
-	});
 
 	EntityComponentSystem &ecs = engine.getEcs();
 	object = ecs.newEntity();
 	auto renderComp = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData));
 	renderComp->colour = Colour::fromRGBA(252, 171, 20, 255);
 	auto renderPos = ecs.createComponent<PositionComponent>(object, Rect(0, 0, 0, 0));
+	renderPos->scale *= 0.5f;
 	renderPos->rotationAxis = glm::vec3(0, 1, 0);
 }
 
