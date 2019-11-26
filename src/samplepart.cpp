@@ -14,7 +14,7 @@ SamplePart::SamplePart() : Part("Sample")
 
 void SamplePart::onStart(Engine &engine)
 {
-	engine.getImageLoader().loadImage("data/test.png");
+	//tex = engine.getImageLoader().loadImage("data/diskette.png");
 
 	std::array<float, 108> verts = {
 		-1.0f,-1.0f,-1.0f, // triangle 1 : begin
@@ -65,7 +65,7 @@ void SamplePart::onStart(Engine &engine)
 	auto renderComp = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData));
 	renderComp->colour = Colour::fromRGBA(252, 171, 20, 255);
 	auto renderPos = ecs.createComponent<PositionComponent>(object, Rect(0, 0, 0, 0));
-	renderPos->scale *= 0.5f;
+	renderPos->scale *= 0.7f;
 	renderPos->rotationAxis = glm::vec3(0, 1, 0);
 }
 

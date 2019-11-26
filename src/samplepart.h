@@ -8,6 +8,8 @@ class SamplePart : public Boiler::Part
 {
 	Boiler::Entity object;
 	Boiler::Engine *engine;
+
+	std::shared_ptr<const Boiler::Texture> tex;
 	
 public:
     SamplePart();
