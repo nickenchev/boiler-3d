@@ -14,7 +14,7 @@ SamplePart::SamplePart() : Part("Sample")
 
 void SamplePart::onStart(Engine &engine)
 {
-	//tex = engine.getImageLoader().loadImage("data/diskette.png");
+	tex = engine.getImageLoader().loadImage("data/diskette.png");
 
 	std::array<float, 108> verts = {
 		-1.0f,-1.0f,-1.0f, // triangle 1 : begin
