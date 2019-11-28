@@ -9,6 +9,8 @@ class SamplePart : public Boiler::Part
 	Boiler::Entity object;
 	Boiler::Engine *engine;
 
+	bool turnLeft, turnRight;
+
 	std::shared_ptr<const Boiler::Texture> tex;
 	
 public:
