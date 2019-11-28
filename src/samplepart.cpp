@@ -22,6 +22,16 @@ void SamplePart::onStart(Engine &engine)
 	tex = engine.getImageLoader().loadImage("data/diskette.png");
 	SpriteSheetFrame sheetFrame(tex, nullptr);
 
+	const std::vector<Vertex> verts = {
+		{{-0.5f, -0.5f, 0}, {1.0f, 0.0f, 0.0f, 1}, {1.0f, 0.0f}},
+		{{0.5f, -0.5f, 0}, {0.0f, 1.0f, 0.0f, 1}, {0.0f, 0.0f}},
+		{{-0.5f, 0.5f, 0}, {0.0f, 0.0f, 1.0f, 1}, {0.0f, 1.0f}},
+		{{-0.5f, 0.5f, 0}, {0.0f, 0.0f, 1.0f, 1}, {0.0f, 1.0f}},
+		{{0.5f, -0.5f, 0}, {0.0f, 1.0f, 0.0f, 1}, {0.0f, 0.0f}},
+		{{0.5f, 0.5f, 0}, {1.0f, 0.0f, 0.0f, 1}, {1.0f, 0.0f}},
+	};
+
+	/*
 	std::array<float, 108> verts = {
 		-1.0f,-1.0f,-1.0f, // triangle 1 : begin
 		-1.0f,-1.0f, 1.0f,
@@ -60,6 +70,7 @@ void SamplePart::onStart(Engine &engine)
 		-1.0f, 1.0f, 1.0f,
 		1.0f,-1.0f, 1.0f
 	};
+	*/
 
 	VertexData vertData(verts);
 
