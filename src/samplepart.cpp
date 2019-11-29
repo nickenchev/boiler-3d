@@ -22,6 +22,7 @@ void SamplePart::onStart(Engine &engine)
 	tex = engine.getImageLoader().loadImage("data/test.png");
 	SpriteSheetFrame sheetFrame(tex, nullptr);
 
+	/*
 	const std::vector<Vertex> verts = {
 		{{-0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 		{{0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
@@ -31,15 +32,14 @@ void SamplePart::onStart(Engine &engine)
 		{{0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
 		{{0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
 	};
+	*/
 
-	/*
 	const std::vector<Vertex> vertices = {
-		{{-0.5f, -0.5f, 0}, {1.0f, 0.0f, 0.0f, 1}, {1.0f, 0.0f}},
-		{{0.5f, -0.5f, 0}, {0.0f, 1.0f, 0.0f, 1}, {0.0f, 0.0f}},
-		{{0.5f, 0.5f, 0}, {0.0f, 0.0f, 1.0f, 1}, {0.0f, 1.0f}},
+		{{-0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 0.0f}},
+		{{0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 0.0f}},
+		{{0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 1.0f}}
 	};
-	*/
 
 	const std::vector<uint16_t> indices = {
 		0, 1, 2, 2, 3, 0
@@ -86,7 +86,7 @@ void SamplePart::onStart(Engine &engine)
 	};
 	*/
 
-	VertexData vertData(verts, indices);
+	VertexData vertData(vertices, indices);
 
 	this->engine = &engine;
 	engine.getRenderer().setClearColor({0, 0, 0});
