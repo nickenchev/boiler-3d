@@ -22,23 +22,18 @@ void SamplePart::onStart(Engine &engine)
 	tex = engine.getImageLoader().loadImage("data/test.png");
 	SpriteSheetFrame sheetFrame(tex, nullptr);
 
-	/*
-	const std::vector<Vertex> verts = {
-		{{-0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-		{{0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-		{{-0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
-
-		{{-0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-		{{0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-		{{0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-	};
-	*/
-
 	const std::vector<Vertex> vertices = {
 		{{-0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 1.0f}}
+	};
+
+	const std::vector<Vertex> vertices2 = {
+		{{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 0.0f}},
+		{{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 0.0f}},
+		{{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}},
+		{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 1.0f}}
 	};
 
 	const std::vector<uint16_t> indices = {
@@ -86,11 +81,11 @@ void SamplePart::onStart(Engine &engine)
 	};
 	*/
 
-	VertexData vertData(vertices, indices);
 
 	this->engine = &engine;
 	engine.getRenderer().setClearColor({0, 0, 0});
 
+	VertexData vertData(vertices, indices);
 	EntityComponentSystem &ecs = engine.getEcs();
 	object = ecs.newEntity();
 	auto renderComp = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData), sheetFrame);
@@ -98,6 +93,15 @@ void SamplePart::onStart(Engine &engine)
 	auto renderPos = ecs.createComponent<PositionComponent>(object, Rect(0, 0, 0, 0));
 	renderPos->scale *= 0.7f;
 	renderPos->rotationAxis = glm::vec3(0, 1, 0);
+
+
+	VertexData vertData2(vertices2, indices);
+	object2 = ecs.newEntity();
+	auto renderComp2 = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData), sheetFrame);
+	renderComp2->colour = Colour::fromRGBA(252, 171, 20, 255);
+	auto renderPos2 = ecs.createComponent<PositionComponent>(object, Rect(0, 0, 0, 0));
+	renderPos2->scale *= 1.0f;
+	renderPos2->rotationAxis = glm::vec3(0, 1, 0);
 
     auto keyListener = [this, &engine](const KeyInputEvent &event)
 	{

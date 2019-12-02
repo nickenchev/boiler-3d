@@ -6,7 +6,7 @@
 
 class SamplePart : public Boiler::Part
 {
-	Boiler::Entity object;
+	Boiler::Entity object, object2;
 	Boiler::Engine *engine;
 
 	bool turnLeft, turnRight;
