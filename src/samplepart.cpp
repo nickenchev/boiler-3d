@@ -15,6 +15,8 @@ SamplePart::SamplePart() : Part("Sample")
 {
 	turnLeft = false;
 	turnRight = false;
+	moveCloser = false;
+	moveFurther = false;
 }
 
 void SamplePart::onStart(Engine &engine)
@@ -26,61 +28,18 @@ void SamplePart::onStart(Engine &engine)
 		{{-0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 0.0f}},
 		{{0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 0.0f}},
 		{{0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}}
-	};
+		{{-0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}},
 
-	const std::vector<Vertex> vertices2 = {
-		{{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 0.0f}},
-		{{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 0.0f}},
-		{{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}},
-		{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 1.0f}}
+		{{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 0.0f}},
+		{{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 0.0f}},
+		{{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 1.0f}},
+		{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}}
 	};
 
 	const std::vector<uint16_t> indices = {
-		0, 2, 1, 2, 0, 3
+		0, 2, 1, 2, 0, 3,
+		4, 6, 5, 6, 4, 7
 	};
-
-	/*
-	std::array<float, 108> verts = {
-		-1.0f,-1.0f,-1.0f, // triangle 1 : begin
-		-1.0f,-1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f, // triangle 1 : end
-		1.0f, 1.0f,-1.0f, // triangle 2 : begin
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f,-1.0f, // triangle 2 : end
-		1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f,-1.0f,
-		1.0f,-1.0f,-1.0f,
-		1.0f, 1.0f,-1.0f,
-		1.0f,-1.0f,-1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f,-1.0f,
-		1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f,-1.0f, 1.0f,
-		1.0f,-1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f,-1.0f,-1.0f,
-		1.0f, 1.0f,-1.0f,
-		1.0f,-1.0f,-1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f,-1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f,-1.0f,
-		-1.0f, 1.0f,-1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f,-1.0f, 1.0f
-	};
-	*/
-
 
 	this->engine = &engine;
 	engine.getRenderer().setClearColor({0, 0, 0});
@@ -93,15 +52,6 @@ void SamplePart::onStart(Engine &engine)
 	auto renderPos = ecs.createComponent<PositionComponent>(object, Rect(0, 0, 0, 0));
 	renderPos->scale *= 0.7f;
 	renderPos->rotationAxis = glm::vec3(0, 1, 0);
-
-
-	VertexData vertData2(vertices2, indices);
-	object2 = ecs.newEntity();
-	auto renderComp2 = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData), sheetFrame);
-	renderComp2->colour = Colour::fromRGBA(252, 171, 20, 255);
-	auto renderPos2 = ecs.createComponent<PositionComponent>(object, Rect(0, 0, 0, 0));
-	renderPos2->scale *= 1.0f;
-	renderPos2->rotationAxis = glm::vec3(0, 1, 0);
 
     auto keyListener = [this, &engine](const KeyInputEvent &event)
 	{
