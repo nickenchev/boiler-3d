@@ -23,10 +23,10 @@ void SamplePart::onStart(Engine &engine)
 	SpriteSheetFrame sheetFrame(tex, nullptr);
 
 	const std::vector<Vertex> vertices = {
-		{{-0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 0.0f}},
-		{{0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 0.0f}},
-		{{0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}},
-		{{-0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 1.0f}}
+		{{-0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 0.0f}},
+		{{0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 0.0f}},
+		{{0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 1.0f}},
+		{{-0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}}
 	};
 
 	const std::vector<Vertex> vertices2 = {
@@ -37,7 +37,7 @@ void SamplePart::onStart(Engine &engine)
 	};
 
 	const std::vector<uint16_t> indices = {
-		0, 1, 2, 2, 3, 0
+		0, 2, 1, 2, 0, 3
 	};
 
 	/*
@@ -112,11 +112,19 @@ void SamplePart::onStart(Engine &engine)
 		{
 			if (event.keyCode == SDLK_a)
 			{
-				turnLeft = true;
+				turnLeft = true;;
 			}
 			else if (event.keyCode == SDLK_d)
 			{
-				turnRight = true;
+				turnRight = true;;
+			}
+			else if (event.keyCode == SDLK_s)
+			{
+				moveCloser = true;
+			}
+			else if (event.keyCode == SDLK_w)
+			{
+				moveFurther = true;
 			}
 		}
 		else if (event.state == ButtonState::UP)
@@ -129,6 +137,14 @@ void SamplePart::onStart(Engine &engine)
 			{
 				turnRight = false;
 			}
+			else if (event.keyCode == SDLK_s)
+			{
+				moveCloser = false;
+			}
+			else if (event.keyCode == SDLK_w)
+			{
+				moveFurther = false;
+			}
 		}
 	};
 	engine.addKeyInputListener(keyListener);
@@ -140,10 +156,19 @@ void SamplePart::update(double deltaTime)
 	PositionComponent &pos = ecs.getComponentStore().retrieve<PositionComponent>(object);
 	if (turnLeft)
 	{
-		pos.rotationAngle += 35.0f * deltaTime;
+		pos.rotationAngle -= 35.0f * deltaTime;
 	}
 	else if (turnRight)
 	{
-		pos.rotationAngle -= 35.0f * deltaTime;
+		pos.rotationAngle += 35.0f * deltaTime;
+	}
+
+	if (moveCloser)
+	{
+		pos.frame.position.z += 2.0f * deltaTime;
+	}
+	else if (moveFurther)
+	{
+		pos.frame.position.z -= 2.0f * deltaTime;
 	}
 }
