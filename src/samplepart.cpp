@@ -9,6 +9,9 @@
 #include "core/components/positioncomponent.h"
 #include "core/components/spritecomponent.h"
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "external/tiny_obj_loader.h"
+
 using namespace Boiler;
 
 SamplePart::SamplePart() : Part("Sample")
@@ -21,25 +24,46 @@ SamplePart::SamplePart() : Part("Sample")
 
 void SamplePart::onStart(Engine &engine)
 {
-	tex = engine.getImageLoader().loadImage("data/test.png");
+	using namespace tinyobj;
+	attrib_t attrib;
+	std::vector<shape_t> shapes;
+	std::vector<material_t> materials;
+	std::string warning, error;
+	Logger logger("Samplepart");
+	
+	if (!LoadObj(&attrib, &shapes, &materials, &warning, &error, "data/chalet.obj"))
+	{
+		throw std::runtime_error(warning + error);
+	}
+
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
+
+	logger.log("attrib: {}", attrib.GetVertices().size());
+
+	for (const auto& shape : shapes) {
+		for (const auto& index : shape.mesh.indices) {
+			Vertex vertex = {};
+			vertex.position = {
+				attrib.vertices[3 * index.vertex_index + 0],
+				attrib.vertices[3 * index.vertex_index + 1],
+				attrib.vertices[3 * index.vertex_index + 2]
+			};
+
+			vertex.textureCoordinate = {
+				attrib.texcoords[2 * index.texcoord_index + 0],
+				1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+			};
+
+			vertex.colour = {1.0f, 1.0f, 1.0f, 1.0f};
+			vertices.push_back(vertex);
+			indices.push_back(indices.size());
+		}
+	}
+	logger.log("Verts: {}, Indices: {}", vertices.size(), indices.size());
+
+	tex = engine.getImageLoader().loadImage("data/chalet.png");
 	SpriteSheetFrame sheetFrame(tex, nullptr);
-
-	const std::vector<Vertex> vertices = {
-		{{-0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 0.0f}},
-		{{0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f, 0}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}},
-
-		{{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 0.0f}},
-		{{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f, 1}, {0.0f, 1.0f}}
-	};
-
-	const std::vector<uint16_t> indices = {
-		0, 2, 1, 2, 0, 3,
-		4, 6, 5, 6, 4, 7
-	};
 
 	this->engine = &engine;
 	engine.getRenderer().setClearColor({0, 0, 0});
@@ -50,8 +74,9 @@ void SamplePart::onStart(Engine &engine)
 	auto renderComp = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData), sheetFrame);
 	renderComp->colour = Colour::fromRGBA(252, 171, 20, 255);
 	auto renderPos = ecs.createComponent<PositionComponent>(object, Rect(0, 0, 0, 0));
-	renderPos->scale *= 0.7f;
-	renderPos->rotationAxis = glm::vec3(0, 1, 0);
+	renderPos->scale *= 1;
+	renderPos->rotationAxis = glm::vec3(1, 1, 0);
+	renderPos->rotationAngle = 90;
 
     auto keyListener = [this, &engine](const KeyInputEvent &event)
 	{
