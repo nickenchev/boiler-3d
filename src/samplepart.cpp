@@ -9,6 +9,16 @@
 #include "core/components/positioncomponent.h"
 #include "core/components/spritecomponent.h"
 
+#define TINYGLTF_IMPLEMENTATION
+#define TINYGLTF_NO_EXTERNAL_IMAGE
+#define TINYGLTF_NO_STB_IMAGE
+#define TINYGLTF_NO_STB_IMAGE_WRITE
+#include "tiny_gltf.h"
+
+namespace Boiler { namespace gltf {
+	constexpr auto noMesh = -1;
+}}
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "external/tiny_obj_loader.h"
 
@@ -24,18 +34,112 @@ SamplePart::SamplePart() : Part("Sample")
 
 void SamplePart::onStart(Engine &engine)
 {
+	this->engine = &engine;
+	engine.getRenderer().setClearColor({0, 0, 0});
+
 	using namespace tinyobj;
 	attrib_t attrib;
 	std::vector<shape_t> shapes;
 	std::vector<material_t> materials;
 	std::string warning, error;
 	Logger logger("Samplepart");
-	
+
+	tex = engine.getImageLoader().loadImage("data/chalet.png");
+	SpriteSheetFrame sheetFrame(tex, nullptr);
+
+	// load GLTF file
+	using namespace tinygltf;
+	std::string gltfFile{"data/test.gltf"};
+	//std::string gltfFile{"data/littlest_tokyo/scene.gltf"};
+	//std::string gltfFile{"data/glTF-Sample-Models-master/2.0/AnimatedMorphCube/glTF/AnimatedMorphCube.gltf"};
+	tinygltf::Model gltfModel;
+	TinyGLTF gltfLoader;
+	std::string gltfWarn, gltfErr;
+
+	logger.log("Loading GLTF 2 model: {}", gltfFile);
+	bool loadRet = gltfLoader.LoadASCIIFromFile(&gltfModel, &gltfErr, &gltfWarn, gltfFile);
+
+	if (!gltfWarn.empty())
+	{
+		logger.log("GLTF Warning: {}", gltfWarn);
+	}
+	if (!gltfErr.empty())
+	{
+		logger.log("GLTF Error: {}", gltfErr);
+	}
+	if (!loadRet)
+	{
+		throw std::runtime_error("Error parsing GLTF model");
+	}
+	else
+	{
+		logger.log("Loading complete: {} buffers, {} meshes", gltfModel.buffers.size(), gltfModel.meshes.size());
+	}
+
+	EntityComponentSystem &ecs = engine.getEcs();
+
+	// load all mesh data
+	for (auto &mesh : gltfModel.meshes)
+	{
+		for (auto &primitive : mesh.primitives)
+		{
+			Entity primitiveEntity = ecs.newEntity();
+			object = primitiveEntity;
+
+			if (primitive.mode != 4)
+			{
+				throw std::runtime_error("Only triangle list supported");
+			}
+
+			// vertex buffer
+			const Accessor &positionAccess = gltfModel.accessors[primitive.attributes["POSITION"]];
+			const BufferView &posBufferView = gltfModel.bufferViews[positionAccess.bufferView];
+			const Buffer &positionBuffer = gltfModel.buffers[posBufferView.buffer];
+			const float *positionData = reinterpret_cast<const float *>(&positionBuffer.data[posBufferView.byteOffset + positionAccess.byteOffset]);
+
+			std::vector<Vertex> vertices;
+			vertices.reserve(positionAccess.count);
+			for (size_t i = 0; i < positionAccess.count; ++i)
+			{
+				Vertex vertex;
+				vertex.position = {positionData[i * 3], positionData[i * 3 + 1], positionData[i * 3 + 2]};
+				vertex.colour = {1, 1, 1, 1};
+				vertices.push_back(vertex);
+			}
+
+			// index buffer
+			const Accessor &indexAccess = gltfModel.accessors[primitive.indices];
+			const BufferView &idxBufferView = gltfModel.bufferViews[indexAccess.bufferView];
+			const Buffer &indexBuffer = gltfModel.buffers[idxBufferView.buffer];
+			const unsigned short *indexData = reinterpret_cast<const unsigned short *>(&indexBuffer.data[idxBufferView.byteOffset + indexAccess.byteOffset]);
+
+			std::vector<uint32_t> indices;
+			indices.reserve(indexAccess.count);
+			for (size_t i = 0; i < indexAccess.count; ++i)
+			{
+				indices.push_back(indexData[i]);
+			}
+
+			for (size_t i = 0; i < indices.size(); ++i)
+			{
+				auto &vertex = vertices[indices[i]];
+				logger.log("{}: {}, {}, {}", indices[i], vertex.position.x, vertex.position.y, vertex.position.z);
+			}
+
+			const VertexData vertData(vertices, indices);
+			auto renderComp = ecs.createComponent<RenderComponent>(primitiveEntity, engine.getRenderer().loadModel(vertData), sheetFrame);
+			auto renderPos = ecs.createComponent<PositionComponent>(primitiveEntity, Rect(0, 0, 0, 0));
+			renderPos->scale = vec3(10, 10, 10);
+
+			logger.log("Finished processing primitive");
+		}
+	}
+
+	/*
 	if (!LoadObj(&attrib, &shapes, &materials, &warning, &error, "data/chalet.obj"))
 	{
 		throw std::runtime_error(warning + error);
 	}
-
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 
@@ -62,11 +166,6 @@ void SamplePart::onStart(Engine &engine)
 	}
 	logger.log("Verts: {}, Indices: {}", vertices.size(), indices.size());
 
-	tex = engine.getImageLoader().loadImage("data/chalet.png");
-	SpriteSheetFrame sheetFrame(tex, nullptr);
-
-	this->engine = &engine;
-	engine.getRenderer().setClearColor({0, 0, 0});
 
 	VertexData vertData(vertices, indices);
 	EntityComponentSystem &ecs = engine.getEcs();
@@ -78,6 +177,7 @@ void SamplePart::onStart(Engine &engine)
 	renderPos->rotationAxis = glm::vec3(1, 1, 0);
 	renderPos->rotationAngle = 90;
 
+	*/
     auto keyListener = [this, &engine](const KeyInputEvent &event)
 	{
 		const int maxTileSize = 100;
