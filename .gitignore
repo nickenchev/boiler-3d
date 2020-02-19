@@ -3,3 +3,6 @@ build/
 .clangd/
 *.spv
 data/
+.vscode/
+.dir-locals.el
+run.sh

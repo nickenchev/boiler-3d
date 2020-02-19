@@ -78,6 +78,7 @@ void SamplePart::onStart(Engine &engine)
 
 	EntityComponentSystem &ecs = engine.getEcs();
 
+	/*
 	// load all mesh data
 	for (auto &mesh : gltfModel.meshes)
 	{
@@ -134,6 +135,7 @@ void SamplePart::onStart(Engine &engine)
 			logger.log("Finished processing primitive");
 		}
 	}
+	*/
 
 	/*
 	if (!LoadObj(&attrib, &shapes, &materials, &warning, &error, "data/chalet.obj"))
@@ -227,6 +229,7 @@ void SamplePart::onStart(Engine &engine)
 
 void SamplePart::update(double deltaTime)
 {
+	/*
 	EntityComponentSystem &ecs = engine->getEcs();
 	PositionComponent &pos = ecs.getComponentStore().retrieve<PositionComponent>(object);
 	if (turnLeft)
@@ -246,4 +249,5 @@ void SamplePart::update(double deltaTime)
 	{
 		pos.frame.position.z -= 2.0f * deltaTime;
 	}
+	*/
 }
