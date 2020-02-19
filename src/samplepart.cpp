@@ -49,7 +49,8 @@ void SamplePart::onStart(Engine &engine)
 
 	// load GLTF file
 	using namespace tinygltf;
-	std::string gltfFile{"data/test.gltf"};
+	//std::string gltfFile{"data/Box.gltf"};
+	std::string gltfFile{"data/lantern/Lantern.gltf"};
 	//std::string gltfFile{"data/littlest_tokyo/scene.gltf"};
 	//std::string gltfFile{"data/glTF-Sample-Models-master/2.0/AnimatedMorphCube/glTF/AnimatedMorphCube.gltf"};
 	tinygltf::Model gltfModel;
@@ -73,66 +74,68 @@ void SamplePart::onStart(Engine &engine)
 	}
 	else
 	{
-		logger.log("Loading complete: {} buffers, {} meshes", gltfModel.buffers.size(), gltfModel.meshes.size());
+		logger.log("Loading scene data: {} buffers, {} meshes", gltfModel.buffers.size(), gltfModel.meshes.size());
 	}
 
 	EntityComponentSystem &ecs = engine.getEcs();
 
+	// load scene data
 	/*
-	// load all mesh data
-	for (auto &mesh : gltfModel.meshes)
+	for (const auto &nodeIndex : gltfModel.scenes[gltfModel.defaultScene].nodes)
 	{
-		for (auto &primitive : mesh.primitives)
+		const Node &node = gltfModel.nodes[nodeIndex];
+		logger.log("Node mesh: {}", node.mesh);
+		if (node.mesh > gltf::noMesh)
 		{
-			Entity primitiveEntity = ecs.newEntity();
-			object = primitiveEntity;
+			Mesh &mesh = gltfModel.meshes[node.mesh];
+			logger.log("Loading mesh: {}", mesh.name);
 
-			if (primitive.mode != 4)
+			for (auto &primitive : mesh.primitives)
 			{
-				throw std::runtime_error("Only triangle list supported");
+				Entity primitiveEntity = ecs.newEntity();
+				object = primitiveEntity;
+
+				if (primitive.mode != 4)
+				{
+					throw std::runtime_error("Only triangle list supported");
+				}
+
+				// vertex buffer
+				const Accessor &positionAccess = gltfModel.accessors[primitive.attributes["POSITION"]];
+				const BufferView &posBufferView = gltfModel.bufferViews[positionAccess.bufferView];
+				const Buffer &positionBuffer = gltfModel.buffers[posBufferView.buffer];
+				const float *positionData = reinterpret_cast<const float *>(&positionBuffer.data[posBufferView.byteOffset + positionAccess.byteOffset]);
+
+				std::vector<Vertex> vertices;
+
+				vertices.reserve(positionAccess.count);
+				for (size_t i = 0; i < positionAccess.count; ++i)
+				{
+					Vertex vertex;
+					vertex.position = {positionData[i * 3], positionData[i * 3 + 1], positionData[i * 3 + 2]};
+					vertex.colour = {1, 1, 1, 1};
+					vertices.push_back(vertex);
+				}
+
+				// index buffer
+				const Accessor &indexAccess = gltfModel.accessors[primitive.indices];
+				const BufferView &idxBufferView = gltfModel.bufferViews[indexAccess.bufferView];
+				const Buffer &indexBuffer = gltfModel.buffers[idxBufferView.buffer];
+				const unsigned short *indexData = reinterpret_cast<const unsigned short *>(&indexBuffer.data[idxBufferView.byteOffset + indexAccess.byteOffset]);
+
+				std::vector<uint32_t> indices;
+				indices.reserve(indexAccess.count);
+				for (size_t i = 0; i < indexAccess.count; ++i)
+				{
+					indices.push_back(indexData[i]);
+				}
+
+				const VertexData vertData(vertices, indices);
+				auto renderComp = ecs.createComponent<RenderComponent>(primitiveEntity, engine.getRenderer().loadModel(vertData), sheetFrame);
+				auto renderPos = ecs.createComponent<PositionComponent>(primitiveEntity, Rect(0, 0, 0, 0));
+				renderPos->rotationAxis = glm::vec3(0, 1, 0);
+				renderPos->rotationAngle = 90;
 			}
-
-			// vertex buffer
-			const Accessor &positionAccess = gltfModel.accessors[primitive.attributes["POSITION"]];
-			const BufferView &posBufferView = gltfModel.bufferViews[positionAccess.bufferView];
-			const Buffer &positionBuffer = gltfModel.buffers[posBufferView.buffer];
-			const float *positionData = reinterpret_cast<const float *>(&positionBuffer.data[posBufferView.byteOffset + positionAccess.byteOffset]);
-
-			std::vector<Vertex> vertices;
-			vertices.reserve(positionAccess.count);
-			for (size_t i = 0; i < positionAccess.count; ++i)
-			{
-				Vertex vertex;
-				vertex.position = {positionData[i * 3], positionData[i * 3 + 1], positionData[i * 3 + 2]};
-				vertex.colour = {1, 1, 1, 1};
-				vertices.push_back(vertex);
-			}
-
-			// index buffer
-			const Accessor &indexAccess = gltfModel.accessors[primitive.indices];
-			const BufferView &idxBufferView = gltfModel.bufferViews[indexAccess.bufferView];
-			const Buffer &indexBuffer = gltfModel.buffers[idxBufferView.buffer];
-			const unsigned short *indexData = reinterpret_cast<const unsigned short *>(&indexBuffer.data[idxBufferView.byteOffset + indexAccess.byteOffset]);
-
-			std::vector<uint32_t> indices;
-			indices.reserve(indexAccess.count);
-			for (size_t i = 0; i < indexAccess.count; ++i)
-			{
-				indices.push_back(indexData[i]);
-			}
-
-			for (size_t i = 0; i < indices.size(); ++i)
-			{
-				auto &vertex = vertices[indices[i]];
-				logger.log("{}: {}, {}, {}", indices[i], vertex.position.x, vertex.position.y, vertex.position.z);
-			}
-
-			const VertexData vertData(vertices, indices);
-			auto renderComp = ecs.createComponent<RenderComponent>(primitiveEntity, engine.getRenderer().loadModel(vertData), sheetFrame);
-			auto renderPos = ecs.createComponent<PositionComponent>(primitiveEntity, Rect(0, 0, 0, 0));
-			renderPos->scale = vec3(10, 10, 10);
-
-			logger.log("Finished processing primitive");
 		}
 	}
 	*/
@@ -168,9 +171,7 @@ void SamplePart::onStart(Engine &engine)
 	}
 	logger.log("Verts: {}, Indices: {}", vertices.size(), indices.size());
 
-
 	VertexData vertData(vertices, indices);
-	EntityComponentSystem &ecs = engine.getEcs();
 	object = ecs.newEntity();
 	auto renderComp = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData), sheetFrame);
 	renderComp->colour = Colour::fromRGBA(252, 171, 20, 255);
@@ -178,8 +179,8 @@ void SamplePart::onStart(Engine &engine)
 	renderPos->scale *= 1;
 	renderPos->rotationAxis = glm::vec3(1, 1, 0);
 	renderPos->rotationAngle = 90;
-
 	*/
+
     auto keyListener = [this, &engine](const KeyInputEvent &event)
 	{
 		const int maxTileSize = 100;
