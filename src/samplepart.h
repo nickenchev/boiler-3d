@@ -7,16 +7,14 @@
 class SamplePart : public Boiler::Part
 {
 	Boiler::Entity object;
-	Boiler::Engine *engine;
 
 	bool turnLeft, turnRight, moveCloser, moveFurther;
-
 	std::shared_ptr<const Boiler::Texture> tex;
 	
 public:
-    SamplePart();
+    SamplePart(Boiler::Engine &engine);
 
-    void onStart(Boiler::Engine &engine) override;
+    void onStart() override;
     void update(double deltaTime) override;
 };
 

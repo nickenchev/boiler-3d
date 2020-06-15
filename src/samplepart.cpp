@@ -1,4 +1,6 @@
-#include <array>
+#include <fstream>
+#include <sstream>
+
 #include <glm/glm.hpp>
 #include "SDL_keycode.h"
 #include "input/inputevent.h"
@@ -9,22 +11,13 @@
 #include "core/components/positioncomponent.h"
 #include "core/components/spritecomponent.h"
 
-#define TINYGLTF_IMPLEMENTATION
-#define TINYGLTF_NO_EXTERNAL_IMAGE
-#define TINYGLTF_NO_STB_IMAGE
-#define TINYGLTF_NO_STB_IMAGE_WRITE
-#include "tiny_gltf.h"
-
-namespace Boiler { namespace gltf {
-	constexpr auto noMesh = -1;
-}}
-
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "external/tiny_obj_loader.h"
+#include "gltf.h"
+#include "typedaccessor.h"
+#include "modelaccessors.h"
 
 using namespace Boiler;
 
-SamplePart::SamplePart() : Part("Sample")
+SamplePart::SamplePart(Engine &engine) : Part("Sample", engine)
 {
 	turnLeft = false;
 	turnRight = false;
@@ -32,159 +25,85 @@ SamplePart::SamplePart() : Part("Sample")
 	moveFurther = false;
 }
 
-void SamplePart::onStart(Engine &engine)
+void SamplePart::onStart()
 {
-	this->engine = &engine;
-	engine.getRenderer().setClearColor({0, 0, 0});
-
-	using namespace tinyobj;
-	attrib_t attrib;
-	std::vector<shape_t> shapes;
-	std::vector<material_t> materials;
-	std::string warning, error;
 	Logger logger("Samplepart");
 
-	tex = engine.getImageLoader().loadImage("data/chalet.png");
+	tex = engine.getImageLoader().loadImage("data/test.png");
 	SpriteSheetFrame sheetFrame(tex, nullptr);
 
+	engine.getRenderer().setClearColor({0, 0, 0});
+
 	// load GLTF file
-	using namespace tinygltf;
+	//std::string gltfFile{"data/blender_box.gltf"};
+	//std::string gltfFile{"data/monkey.gltf"};
+	std::string gltfFile{"data/donut.gltf"};
 	//std::string gltfFile{"data/Box.gltf"};
-	std::string gltfFile{"data/lantern/Lantern.gltf"};
+	//std::string gltfFile{"data/lantern/Lantern.gltf"};
 	//std::string gltfFile{"data/littlest_tokyo/scene.gltf"};
 	//std::string gltfFile{"data/glTF-Sample-Models-master/2.0/AnimatedMorphCube/glTF/AnimatedMorphCube.gltf"};
-	tinygltf::Model gltfModel;
-	TinyGLTF gltfLoader;
-	std::string gltfWarn, gltfErr;
-
-	logger.log("Loading GLTF 2 model: {}", gltfFile);
-	bool loadRet = gltfLoader.LoadASCIIFromFile(&gltfModel, &gltfErr, &gltfWarn, gltfFile);
-
-	if (!gltfWarn.empty())
-	{
-		logger.log("GLTF Warning: {}", gltfWarn);
-	}
-	if (!gltfErr.empty())
-	{
-		logger.log("GLTF Error: {}", gltfErr);
-	}
-	if (!loadRet)
-	{
-		throw std::runtime_error("Error parsing GLTF model");
-	}
-	else
-	{
-		logger.log("Loading scene data: {} buffers, {} meshes", gltfModel.buffers.size(), gltfModel.meshes.size());
-	}
-
 	EntityComponentSystem &ecs = engine.getEcs();
+    
+	std::ifstream infile(gltfFile);
+	std::stringstream buffer;
+	buffer << infile.rdbuf();
+	const std::string jsonString = buffer.str();
+	infile.close();
 
-	// load scene data
-	/*
-	for (const auto &nodeIndex : gltfModel.scenes[gltfModel.defaultScene].nodes)
+	auto model = Boiler::gltf::load(jsonString);
+
+	std::vector<std::vector<std::byte>> buffers;
+	for (const auto &buffer : model.buffers)
 	{
-		const Node &node = gltfModel.nodes[nodeIndex];
-		logger.log("Node mesh: {}", node.mesh);
-		if (node.mesh > gltf::noMesh)
+		buffers.push_back(loadBuffer("data/", buffer));
+	}
+	gltf::ModelAccessors modelAccess(model, std::move(buffers));
+
+	for (auto &mesh : model.meshes)
+	{
+		for (auto &primitive : mesh.primitives)
 		{
-			Mesh &mesh = gltfModel.meshes[node.mesh];
-			logger.log("Loading mesh: {}", mesh.name);
+			using namespace gltf::attributes;
 
-			for (auto &primitive : mesh.primitives)
+			// get the primitive's position data
+			std::vector<Vertex> vertices;
+			auto positionAccess = modelAccess.getTypedAccessor<float, 3>(primitive, POSITION);
+			float colour = 0;
+			for (auto values : positionAccess)
 			{
-				Entity primitiveEntity = ecs.newEntity();
-				object = primitiveEntity;
-
-				if (primitive.mode != 4)
+				Vertex vertex({values[0], -values[1], values[2]});
+				vertex.colour = {colour, colour, colour, 1};
+				colour += 0.1;
+				if (colour > 1)
 				{
-					throw std::runtime_error("Only triangle list supported");
+					colour = 0;
 				}
-
-				// vertex buffer
-				const Accessor &positionAccess = gltfModel.accessors[primitive.attributes["POSITION"]];
-				const BufferView &posBufferView = gltfModel.bufferViews[positionAccess.bufferView];
-				const Buffer &positionBuffer = gltfModel.buffers[posBufferView.buffer];
-				const float *positionData = reinterpret_cast<const float *>(&positionBuffer.data[posBufferView.byteOffset + positionAccess.byteOffset]);
-
-				std::vector<Vertex> vertices;
-
-				vertices.reserve(positionAccess.count);
-				for (size_t i = 0; i < positionAccess.count; ++i)
-				{
-					Vertex vertex;
-					vertex.position = {positionData[i * 3], positionData[i * 3 + 1], positionData[i * 3 + 2]};
-					vertex.colour = {1, 1, 1, 1};
-					vertices.push_back(vertex);
-				}
-
-				// index buffer
-				const Accessor &indexAccess = gltfModel.accessors[primitive.indices];
-				const BufferView &idxBufferView = gltfModel.bufferViews[indexAccess.bufferView];
-				const Buffer &indexBuffer = gltfModel.buffers[idxBufferView.buffer];
-				const unsigned short *indexData = reinterpret_cast<const unsigned short *>(&indexBuffer.data[idxBufferView.byteOffset + indexAccess.byteOffset]);
-
-				std::vector<uint32_t> indices;
-				indices.reserve(indexAccess.count);
-				for (size_t i = 0; i < indexAccess.count; ++i)
-				{
-					indices.push_back(indexData[i]);
-				}
-
-				const VertexData vertData(vertices, indices);
-				auto renderComp = ecs.createComponent<RenderComponent>(primitiveEntity, engine.getRenderer().loadModel(vertData), sheetFrame);
-				auto renderPos = ecs.createComponent<PositionComponent>(primitiveEntity, Rect(0, 0, 0, 0));
-				renderPos->rotationAxis = glm::vec3(0, 1, 0);
-				renderPos->rotationAngle = 90;
+				vertices.push_back(vertex);
 			}
+
+			std::vector<uint32_t> indices;
+			auto indexAccess = modelAccess.getTypedAccessor<unsigned short, 1>(primitive, primitive.indices.value());
+			for (auto values : indexAccess)
+			{
+				indices.push_back(values[0]);
+			}
+
+			const VertexData vertData(vertices, indices);
+			auto model = engine.getRenderer().loadModel(vertData);
+			
+			Entity primitiveEntity = ecs.newEntity();
+			auto renderComp = ecs.createComponent<RenderComponent>(primitiveEntity, model, sheetFrame);
+			auto renderPos = ecs.createComponent<PositionComponent>(primitiveEntity, Rect(0, 0, 0, 0));
+			renderPos->rotationAxis = glm::vec3(0, 1, 0);
+			//renderPos->rotationAngle = 90;
+			this->object = primitiveEntity;
 		}
 	}
-	*/
 
-	/*
-	if (!LoadObj(&attrib, &shapes, &materials, &warning, &error, "data/chalet.obj"))
-	{
-		throw std::runtime_error(warning + error);
-	}
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
-
-	logger.log("attrib: {}", attrib.GetVertices().size());
-
-	for (const auto& shape : shapes) {
-		for (const auto& index : shape.mesh.indices) {
-			Vertex vertex = {};
-			vertex.position = {
-				attrib.vertices[3 * index.vertex_index + 0],
-				attrib.vertices[3 * index.vertex_index + 1],
-				attrib.vertices[3 * index.vertex_index + 2]
-			};
-
-			vertex.textureCoordinate = {
-				attrib.texcoords[2 * index.texcoord_index + 0],
-				1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-			};
-
-			vertex.colour = {1.0f, 1.0f, 1.0f, 1.0f};
-			vertices.push_back(vertex);
-			indices.push_back(indices.size());
-		}
-	}
-	logger.log("Verts: {}, Indices: {}", vertices.size(), indices.size());
-
-	VertexData vertData(vertices, indices);
-	object = ecs.newEntity();
-	auto renderComp = ecs.createComponent<RenderComponent>(object, engine.getRenderer().loadModel(vertData), sheetFrame);
-	renderComp->colour = Colour::fromRGBA(252, 171, 20, 255);
-	auto renderPos = ecs.createComponent<PositionComponent>(object, Rect(0, 0, 0, 0));
-	renderPos->scale *= 1;
-	renderPos->rotationAxis = glm::vec3(1, 1, 0);
-	renderPos->rotationAngle = 90;
-	*/
-
-    auto keyListener = [this, &engine](const KeyInputEvent &event)
+    auto keyListener = [this](const KeyInputEvent &event)
 	{
 		const int maxTileSize = 100;
-		EntityComponentSystem &ecs = engine.getEcs();
+		//EntityComponentSystem &ecs = engine.getEcs();
 
 		if (event.state == ButtonState::DOWN)
 		{
@@ -230,8 +149,7 @@ void SamplePart::onStart(Engine &engine)
 
 void SamplePart::update(double deltaTime)
 {
-	/*
-	EntityComponentSystem &ecs = engine->getEcs();
+	EntityComponentSystem &ecs = engine.getEcs();
 	PositionComponent &pos = ecs.getComponentStore().retrieve<PositionComponent>(object);
 	if (turnLeft)
 	{
@@ -244,11 +162,10 @@ void SamplePart::update(double deltaTime)
 
 	if (moveCloser)
 	{
-		pos.frame.position.z += 2.0f * deltaTime;
+		pos.frame.position.z -= 2.0f * deltaTime;
 	}
 	else if (moveFurther)
 	{
-		pos.frame.position.z -= 2.0f * deltaTime;
+		pos.frame.position.z += 2.0f * deltaTime;
 	}
-	*/
 }
