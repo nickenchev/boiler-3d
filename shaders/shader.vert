@@ -23,5 +23,5 @@ void main()
 	fragPosition = vec3(mvp.model * vec4(vertPosition, 1.0));
 	fragColour = vertColour;
 	fragTexCoord = vertTexCoord;
-	fragNormal = vertNormal;
+	fragNormal = mat3(transpose(inverse(mvp.model))) * vertNormal;
 }
