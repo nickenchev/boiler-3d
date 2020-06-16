@@ -36,8 +36,8 @@ void SamplePart::onStart()
 
 	// load GLTF file
 	//std::string gltfFile{"data/blender_box.gltf"};
-	//std::string gltfFile{"data/monkey.gltf"};
-	std::string gltfFile{"data/donut.gltf"};
+	std::string gltfFile{"data/monkey.gltf"};
+	//std::string gltfFile{"data/donut.gltf"};
 	//std::string gltfFile{"data/Box.gltf"};
 	//std::string gltfFile{"data/lantern/Lantern.gltf"};
 	//std::string gltfFile{"data/littlest_tokyo/scene.gltf"};
@@ -68,17 +68,19 @@ void SamplePart::onStart()
 			// get the primitive's position data
 			std::vector<Vertex> vertices;
 			auto positionAccess = modelAccess.getTypedAccessor<float, 3>(primitive, POSITION);
-			float colour = 0;
 			for (auto values : positionAccess)
 			{
 				Vertex vertex({values[0], -values[1], values[2]});
-				vertex.colour = {colour, colour, colour, 1};
-				colour += 0.1;
-				if (colour > 1)
-				{
-					colour = 0;
-				}
+				vertex.colour = {1, 1, 1, 1};
 				vertices.push_back(vertex);
+			}
+
+			auto normalAccess = modelAccess.getTypedAccessor<float, 3>(primitive, NORMAL);
+			unsigned int vertexIndex = 0;
+			for (auto normal : normalAccess)
+			{
+				vertices[vertexIndex++].normal = {normal[0], normal[1], normal[2]};
+				logger.log("{}, {}, {}", normal[0], normal[1], normal[2]);
 			}
 
 			std::vector<uint32_t> indices;
@@ -96,7 +98,7 @@ void SamplePart::onStart()
 			auto renderPos = ecs.createComponent<PositionComponent>(primitiveEntity, Rect(0, 0, 0, 0));
 			renderPos->rotationAxis = glm::vec3(0, 1, 0);
 			//renderPos->rotationAngle = 90;
-			this->object = primitiveEntity;
+			objects.push_back(primitiveEntity);
 		}
 	}
 
@@ -150,22 +152,25 @@ void SamplePart::onStart()
 void SamplePart::update(double deltaTime)
 {
 	EntityComponentSystem &ecs = engine.getEcs();
-	PositionComponent &pos = ecs.getComponentStore().retrieve<PositionComponent>(object);
-	if (turnLeft)
+	for (auto object : objects)
 	{
-		pos.rotationAngle -= 35.0f * deltaTime;
-	}
-	else if (turnRight)
-	{
-		pos.rotationAngle += 35.0f * deltaTime;
-	}
+		PositionComponent &pos = ecs.getComponentStore().retrieve<PositionComponent>(object);
+		if (turnLeft)
+		{
+			pos.rotationAngle -= 35.0f * deltaTime;
+		}
+		else if (turnRight)
+		{
+			pos.rotationAngle += 35.0f * deltaTime;
+		}
 
-	if (moveCloser)
-	{
-		pos.frame.position.z -= 2.0f * deltaTime;
-	}
-	else if (moveFurther)
-	{
-		pos.frame.position.z += 2.0f * deltaTime;
+		if (moveCloser)
+		{
+			pos.frame.position.z -= 2.0f * deltaTime;
+		}
+		else if (moveFurther)
+		{
+			pos.frame.position.z += 2.0f * deltaTime;
+		}
 	}
 }
