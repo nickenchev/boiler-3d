@@ -1,5 +1,6 @@
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 #include "SDL_keycode.h"
@@ -11,13 +12,97 @@
 #include "core/components/positioncomponent.h"
 #include "core/components/spritecomponent.h"
 
-#include "gltf.h"
-#include "typedaccessor.h"
-#include "modelaccessors.h"
-
 using namespace Boiler;
 
-SamplePart::SamplePart(Engine &engine) : Part("Sample", engine)
+auto SamplePart::loadGltf(const gltf::ModelAccessors &modelAccess, const gltf::Primitive &primitive)
+{
+	EntityComponentSystem &ecs = engine.getEcs();
+	using namespace gltf::attributes;
+
+	// get the primitive's position data
+	std::vector<Vertex> vertices;
+	auto positionAccess = modelAccess.getTypedAccessor<float, 3>(primitive, POSITION);
+	for (auto values : positionAccess)
+	{
+		Vertex vertex({values[0], -values[1], values[2]});
+		vertex.colour = {0.8, 0.2, 0.4, 1};
+		vertices.push_back(vertex);
+	}
+
+	auto normalAccess = modelAccess.getTypedAccessor<float, 3>(primitive, NORMAL);
+	unsigned int vertexIndex = 0;
+	for (auto normal : normalAccess)
+	{
+		vertices[vertexIndex++].normal = {normal[0], normal[1], normal[2]};
+	}
+
+	std::vector<uint32_t> indices;
+	auto indexAccess = modelAccess.getTypedAccessor<unsigned short, 1>(primitive, primitive.indices.value());
+	for (auto values : indexAccess)
+	{
+		indices.push_back(values[0]);
+	}
+
+	const VertexData vertData(vertices, indices);
+	return engine.getRenderer().loadModel(vertData);
+}
+
+Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors &modelAccess, std::unordered_map<int, Entity> &nodeEntities, int nodeIndex)
+{
+	SpriteSheetFrame sheetFrame(tex, nullptr);
+
+	EntityComponentSystem &ecs = engine.getEcs();
+	const auto &node = model.nodes[nodeIndex];
+
+	Entity nodeEntity = ecs.newEntity();
+	objects.push_back(nodeEntity);
+	nodeEntities[nodeIndex] = nodeEntity;
+
+	logger.log("Loading node: {} ({}), as entity #{}", node.name, nodeIndex, nodeEntity.getId());
+
+	// treat node's children
+	for (int childNodeIdx : node.children)
+	{
+		// check if this entity hasn't been processed
+		Entity childEntity;
+		if (nodeEntities.find(childNodeIdx) == nodeEntities.end())
+		{
+			childEntity = loadNode(model, modelAccess, nodeEntities, childNodeIdx);
+		}
+		else
+		{
+			childEntity = nodeEntities[childNodeIdx];
+		}
+		
+		ecs.createComponent<ParentComponent>(childEntity, nodeEntity);
+	}
+
+	if (node.mesh)
+	{
+		const auto &mesh = model.meshes[node.mesh.value()];
+
+		logger.log("Loading mesh with name: {}", mesh.name);
+		for (auto &primitive : mesh.primitives)
+		{
+			auto renderComp = ecs.createComponent<RenderComponent>(nodeEntity, loadGltf(modelAccess, primitive), sheetFrame);
+			auto renderPos = ecs.createComponent<PositionComponent>(nodeEntity, Rect(0, 0, 0, 0));
+			if (node.scale.has_value())
+			{
+				renderPos->scale = {node.scale.value()[0],
+					node.scale.value()[1], node.scale.value()[2]};
+			}
+			if (node.translation.has_value())
+			{
+				renderPos->frame.position = {node.translation.value()[0],
+					node.translation.value()[1], node.translation.value()[2]};
+			}
+			renderPos->rotationAxis = glm::vec3(0, 1, 0);
+		}
+	}
+	return nodeEntity;
+}
+
+SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample Part")
 {
 	turnLeft = false;
 	turnRight = false;
@@ -27,17 +112,15 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine)
 
 void SamplePart::onStart()
 {
-	Logger logger("Samplepart");
 
 	tex = engine.getImageLoader().loadImage("data/test.png");
-	SpriteSheetFrame sheetFrame(tex, nullptr);
 
 	engine.getRenderer().setClearColor({0, 0, 0});
 
 	// load GLTF file
 	//std::string gltfFile{"data/blender_box.gltf"};
-	std::string gltfFile{"data/monkey.gltf"};
-	//std::string gltfFile{"data/donut.gltf"};
+	//std::string gltfFile{"data/monkey.gltf"};
+	std::string gltfFile{"data/donut.gltf"};
 	//std::string gltfFile{"data/Box.gltf"};
 	//std::string gltfFile{"data/lantern/Lantern.gltf"};
 	//std::string gltfFile{"data/littlest_tokyo/scene.gltf"};
@@ -59,47 +142,11 @@ void SamplePart::onStart()
 	}
 	gltf::ModelAccessors modelAccess(model, std::move(buffers));
 
-	for (auto &mesh : model.meshes)
+	const Boiler::gltf::Scene &scene = model.scenes[model.scene];
+	std::unordered_map<int, Entity> entityMap;
+	for (auto &nodeIndex : scene.nodes)
 	{
-		for (auto &primitive : mesh.primitives)
-		{
-			using namespace gltf::attributes;
-
-			// get the primitive's position data
-			std::vector<Vertex> vertices;
-			auto positionAccess = modelAccess.getTypedAccessor<float, 3>(primitive, POSITION);
-			for (auto values : positionAccess)
-			{
-				Vertex vertex({values[0], -values[1], values[2]});
-				vertex.colour = {1, 1, 1, 1};
-				vertices.push_back(vertex);
-			}
-
-			auto normalAccess = modelAccess.getTypedAccessor<float, 3>(primitive, NORMAL);
-			unsigned int vertexIndex = 0;
-			for (auto normal : normalAccess)
-			{
-				vertices[vertexIndex++].normal = {normal[0], normal[1], normal[2]};
-				logger.log("{}, {}, {}", normal[0], normal[1], normal[2]);
-			}
-
-			std::vector<uint32_t> indices;
-			auto indexAccess = modelAccess.getTypedAccessor<unsigned short, 1>(primitive, primitive.indices.value());
-			for (auto values : indexAccess)
-			{
-				indices.push_back(values[0]);
-			}
-
-			const VertexData vertData(vertices, indices);
-			auto model = engine.getRenderer().loadModel(vertData);
-			
-			Entity primitiveEntity = ecs.newEntity();
-			auto renderComp = ecs.createComponent<RenderComponent>(primitiveEntity, model, sheetFrame);
-			auto renderPos = ecs.createComponent<PositionComponent>(primitiveEntity, Rect(0, 0, 0, 0));
-			renderPos->rotationAxis = glm::vec3(0, 1, 0);
-			//renderPos->rotationAngle = 90;
-			objects.push_back(primitiveEntity);
-		}
+		loadNode(model, modelAccess, entityMap, nodeIndex);
 	}
 
     auto keyListener = [this](const KeyInputEvent &event)
@@ -154,23 +201,26 @@ void SamplePart::update(double deltaTime)
 	EntityComponentSystem &ecs = engine.getEcs();
 	for (auto object : objects)
 	{
-		PositionComponent &pos = ecs.getComponentStore().retrieve<PositionComponent>(object);
-		if (turnLeft)
+		if (ecs.getComponentStore().hasComponent<PositionComponent>(object))
 		{
-			pos.rotationAngle -= 35.0f * deltaTime;
-		}
-		else if (turnRight)
-		{
-			pos.rotationAngle += 35.0f * deltaTime;
-		}
+			PositionComponent &pos = ecs.getComponentStore().retrieve<PositionComponent>(object);
+			if (turnLeft)
+			{
+				pos.rotationAngle -= 35.0f * deltaTime;
+			}
+			else if (turnRight)
+			{
+				pos.rotationAngle += 35.0f * deltaTime;
+			}
 
-		if (moveCloser)
-		{
-			pos.frame.position.z -= 2.0f * deltaTime;
-		}
-		else if (moveFurther)
-		{
-			pos.frame.position.z += 2.0f * deltaTime;
+			if (moveCloser)
+			{
+				pos.frame.position.z -= 2.0f * deltaTime;
+			}
+			else if (moveFurther)
+			{
+				pos.frame.position.z += 2.0f * deltaTime;
+			}
 		}
 	}
 }
