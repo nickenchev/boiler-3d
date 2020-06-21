@@ -112,10 +112,15 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 
 SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample Part")
 {
-	turnLeft = false;
-	turnRight = false;
+	moveLeft = false;
+	moveRight = false;
 	moveCloser = false;
 	moveFurther = false;
+	moveUp = false;
+	moveDown = false;
+
+	camPos = {0, 0, 10.0f};
+	direction ={0, 0, -1.0f};
 }
 
 void SamplePart::onStart()
@@ -129,8 +134,8 @@ void SamplePart::onStart()
 	//std::string gltfFile{"data/blender_box.gltf"};
 	//std::string gltfFile{"data/monkey.gltf"};
 	//std::string gltfFile{"data/multi_test.gltf"};
-	std::string gltfFile{"data/parent.gltf"};
-	//std::string gltfFile{"data/donut.gltf"};
+	//std::string gltfFile{"data/parent.gltf"};
+	std::string gltfFile{"data/donut.gltf"};
 	//std::string gltfFile{"data/Box.gltf"};
 	//std::string gltfFile{"data/lantern/Lantern.gltf"};
 	//std::string gltfFile{"data/littlest_tokyo/scene.gltf"};
@@ -164,43 +169,29 @@ void SamplePart::onStart()
 		const int maxTileSize = 100;
 		//EntityComponentSystem &ecs = engine.getEcs();
 
-		if (event.state == ButtonState::DOWN)
+		if (event.keyCode == SDLK_a)
 		{
-			if (event.keyCode == SDLK_a)
-			{
-				turnLeft = true;;
-			}
-			else if (event.keyCode == SDLK_d)
-			{
-				turnRight = true;;
-			}
-			else if (event.keyCode == SDLK_s)
-			{
-				moveCloser = true;
-			}
-			else if (event.keyCode == SDLK_w)
-			{
-				moveFurther = true;
-			}
+			moveLeft = event.state == ButtonState::DOWN;
 		}
-		else if (event.state == ButtonState::UP)
+		else if (event.keyCode == SDLK_d)
 		{
-			if (event.keyCode == SDLK_a)
-			{
-				turnLeft = false;
-			}
-			else if (event.keyCode == SDLK_d)
-			{
-				turnRight = false;
-			}
-			else if (event.keyCode == SDLK_s)
-			{
-				moveCloser = false;
-			}
-			else if (event.keyCode == SDLK_w)
-			{
-				moveFurther = false;
-			}
+			moveRight = event.state == ButtonState::DOWN;
+		}
+		else if (event.keyCode == SDLK_s)
+		{
+			moveCloser = event.state == ButtonState::DOWN;
+		}
+		else if (event.keyCode == SDLK_w)
+		{
+			moveFurther = event.state == ButtonState::DOWN;
+		}
+		else if (event.keyCode == SDLK_PAGEUP)
+		{
+			moveUp = event.state == ButtonState::DOWN;
+		}
+		else if (event.keyCode == SDLK_PAGEDOWN)
+		{
+			moveDown = event.state == ButtonState::DOWN;
 		}
 	};
 	engine.addKeyInputListener(keyListener);
@@ -208,29 +199,34 @@ void SamplePart::onStart()
 
 void SamplePart::update(double deltaTime)
 {
-	EntityComponentSystem &ecs = engine.getEcs();
-	for (auto object : objects)
-	{
-		if (object == 1)
-		{
-			PositionComponent &pos = ecs.getComponentStore().retrieve<PositionComponent>(object);
-			if (turnLeft)
-			{
-				pos.rotationAngle -= 35.0f * deltaTime;
-			}
-			else if (turnRight)
-			{
-				pos.rotationAngle += 35.0f * deltaTime;
-			}
+	glm::mat4 view = glm::lookAt(camPos, camPos + direction, glm::vec3(0.0f, 1.0f, 0.0f));
+	engine.getRenderer().setViewMatrix(view);
 
-			if (moveCloser)
-			{
-				pos.frame.position.z -= 2.0f * deltaTime;
-			}
-			else if (moveFurther)
-			{
-				pos.frame.position.z += 2.0f * deltaTime;
-			}
-		}
+	EntityComponentSystem &ecs = engine.getEcs();
+	if (moveLeft)
+	{
+		camPos.x -= 2.0f * deltaTime;
+	}
+	else if (moveRight)
+	{
+		camPos.x += 2.0f * deltaTime;
+	}
+
+	if (moveCloser)
+	{
+		camPos.z += 2.0f * deltaTime;
+	}
+	else if (moveFurther)
+	{
+		camPos.z -= 2.0f * deltaTime;
+	}
+
+	if (moveUp)
+	{
+		camPos.y -= 2.0f * deltaTime;
+	}
+	else if (moveDown)
+	{
+		camPos.y += 2.0f * deltaTime;
 	}
 }

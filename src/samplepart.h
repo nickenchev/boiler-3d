@@ -12,7 +12,10 @@ class SamplePart : public Boiler::Part
 	Boiler::Logger logger;
 	std::vector<Boiler::Entity> objects;
 
-	bool turnLeft, turnRight, moveCloser, moveFurther;
+	glm::vec3 camPos{0, 0, 10.0f};
+	glm::vec3 direction{0, 0, -1.0f};
+
+	bool moveLeft, moveRight, moveCloser, moveFurther, moveUp, moveDown;
 	std::shared_ptr<const Boiler::Texture> tex;
 
 	auto loadPrimitive(const Boiler::gltf::ModelAccessors &modelAccess, const Boiler::gltf::Primitive &primitive);
