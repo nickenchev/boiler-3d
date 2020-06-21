@@ -3,6 +3,8 @@
 #include <unordered_map>
 
 #include <glm/glm.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+
 #include "SDL_keycode.h"
 #include "input/inputevent.h"
 #include "samplepart.h"
@@ -118,9 +120,12 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample 
 	moveFurther = false;
 	moveUp = false;
 	moveDown = false;
+	turnLeft = false;
+	turnRight = false;
 
-	camPos = {0, 0, 10.0f};
-	direction ={0, 0, -1.0f};
+	camPosition = {0, 0, 10.0f};
+	camDirection = {0, 0, -1.0f};
+	camUp = {0, 1.0f, 0};
 }
 
 void SamplePart::onStart()
@@ -193,40 +198,66 @@ void SamplePart::onStart()
 		{
 			moveDown = event.state == ButtonState::DOWN;
 		}
+		else if (event.keyCode == SDLK_LEFT)
+		{
+			turnLeft = event.state == ButtonState::DOWN;
+		}
+		else if (event.keyCode == SDLK_RIGHT)
+		{
+			turnRight = event.state == ButtonState::DOWN;
+		}
 	};
 	engine.addKeyInputListener(keyListener);
 }
 
 void SamplePart::update(double deltaTime)
 {
-	glm::mat4 view = glm::lookAt(camPos, camPos + direction, glm::vec3(0.0f, 1.0f, 0.0f));
-	engine.getRenderer().setViewMatrix(view);
-
 	EntityComponentSystem &ecs = engine.getEcs();
 	if (moveLeft)
 	{
-		camPos.x -= 2.0f * deltaTime;
+		glm::vec3 moveAmount = glm::cross(camDirection, camUp);
+		moveAmount *= deltaTime;
+		camPosition -= moveAmount;
 	}
 	else if (moveRight)
 	{
-		camPos.x += 2.0f * deltaTime;
+		glm::vec3 moveAmount = glm::cross(camDirection, camUp);
+		moveAmount *= deltaTime;
+		camPosition += moveAmount;
 	}
 
 	if (moveCloser)
 	{
-		camPos.z += 2.0f * deltaTime;
+		glm::vec3 moveAmount = camDirection;
+		moveAmount *= 3.0f * deltaTime;
+		camPosition -= moveAmount;
 	}
 	else if (moveFurther)
 	{
-		camPos.z -= 2.0f * deltaTime;
+		glm::vec3 moveAmount = camDirection;
+		moveAmount *= 3.0f * deltaTime;
+		camPosition += moveAmount;
 	}
 
 	if (moveUp)
 	{
-		camPos.y -= 2.0f * deltaTime;
+		camPosition.y -= 2.0f * deltaTime;
 	}
 	else if (moveDown)
 	{
-		camPos.y += 2.0f * deltaTime;
+		camPosition.y += 2.0f * deltaTime;
 	}
+
+	if (turnLeft)
+	{
+		camDirection = glm::rotate(camDirection, static_cast<float>(2.0f * deltaTime), camUp);
+	}
+	else if (turnRight)
+	{
+		camDirection = glm::rotate(camDirection, static_cast<float>(-2.0f * deltaTime), camUp);
+	}
+
+	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
+	engine.getRenderer().setViewMatrix(view);
+
 }
