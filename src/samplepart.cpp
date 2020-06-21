@@ -14,7 +14,7 @@
 
 using namespace Boiler;
 
-auto SamplePart::loadGltf(const gltf::ModelAccessors &modelAccess, const gltf::Primitive &primitive)
+auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gltf::Primitive &primitive)
 {
 	EntityComponentSystem &ecs = engine.getEcs();
 	using namespace gltf::attributes;
@@ -25,7 +25,7 @@ auto SamplePart::loadGltf(const gltf::ModelAccessors &modelAccess, const gltf::P
 	for (auto values : positionAccess)
 	{
 		Vertex vertex({values[0], -values[1], values[2]});
-		vertex.colour = {0.8, 0.2, 0.4, 1};
+		vertex.colour = {1, 1, 1, 1};
 		vertices.push_back(vertex);
 	}
 
@@ -73,10 +73,10 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 		{
 			childEntity = nodeEntities[childNodeIdx];
 		}
-		
 		ecs.createComponent<ParentComponent>(childEntity, nodeEntity);
 	}
 
+	// if node has a mesh, ensure it is loaded
 	if (node.mesh)
 	{
 		const auto &mesh = model.meshes[node.mesh.value()];
@@ -84,21 +84,29 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 		logger.log("Loading mesh with name: {}", mesh.name);
 		for (auto &primitive : mesh.primitives)
 		{
-			auto renderComp = ecs.createComponent<RenderComponent>(nodeEntity, loadGltf(modelAccess, primitive), sheetFrame);
-			auto renderPos = ecs.createComponent<PositionComponent>(nodeEntity, Rect(0, 0, 0, 0));
-			if (node.scale.has_value())
-			{
-				renderPos->scale = {node.scale.value()[0],
-					node.scale.value()[1], node.scale.value()[2]};
-			}
-			if (node.translation.has_value())
-			{
-				renderPos->frame.position = {node.translation.value()[0],
-					node.translation.value()[1], node.translation.value()[2]};
-			}
-			renderPos->rotationAxis = glm::vec3(0, 1, 0);
+			auto renderComp = ecs.createComponent<RenderComponent>(nodeEntity, loadPrimitive(modelAccess, primitive), sheetFrame);
 		}
 	}
+
+	// ensure each node has a transformation component
+	auto renderPos = ecs.createComponent<PositionComponent>(nodeEntity, Rect(0, 0, 0, 0));
+	if (node.scale.has_value())
+	{
+		renderPos->scale = {
+			node.scale.value()[0],
+			node.scale.value()[1],
+			node.scale.value()[2]
+		};
+	}
+	if (node.translation.has_value())
+	{
+		renderPos->frame.position = {
+			node.translation.value()[0],
+			-node.translation.value()[1],
+			node.translation.value()[2]
+		};
+	}
+	renderPos->rotationAxis = glm::vec3(0, 1, 0);
 	return nodeEntity;
 }
 
@@ -112,15 +120,17 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample 
 
 void SamplePart::onStart()
 {
-
 	tex = engine.getImageLoader().loadImage("data/test.png");
+	SpriteSheetFrame sheetFrame(tex, nullptr);
 
 	engine.getRenderer().setClearColor({0, 0, 0});
 
 	// load GLTF file
 	//std::string gltfFile{"data/blender_box.gltf"};
 	//std::string gltfFile{"data/monkey.gltf"};
-	std::string gltfFile{"data/donut.gltf"};
+	//std::string gltfFile{"data/multi_test.gltf"};
+	std::string gltfFile{"data/parent.gltf"};
+	//std::string gltfFile{"data/donut.gltf"};
 	//std::string gltfFile{"data/Box.gltf"};
 	//std::string gltfFile{"data/lantern/Lantern.gltf"};
 	//std::string gltfFile{"data/littlest_tokyo/scene.gltf"};
@@ -201,7 +211,7 @@ void SamplePart::update(double deltaTime)
 	EntityComponentSystem &ecs = engine.getEcs();
 	for (auto object : objects)
 	{
-		if (ecs.getComponentStore().hasComponent<PositionComponent>(object))
+		if (object == 1)
 		{
 			PositionComponent &pos = ecs.getComponentStore().retrieve<PositionComponent>(object);
 			if (turnLeft)
