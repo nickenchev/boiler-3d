@@ -16,7 +16,7 @@ class SamplePart : public Boiler::Part
 	glm::vec3 camDirection;
 	glm::vec3 camUp;
 
-	bool moveLeft, moveRight, moveCloser, moveFurther, moveUp, moveDown, turnLeft, turnRight;
+	bool moveLeft, moveRight, moveCloser, moveFurther, moveUp, moveDown, turnLeft, turnRight, lookUp, lookDown;
 	std::shared_ptr<const Boiler::Texture> tex;
 
 	auto loadPrimitive(const Boiler::gltf::ModelAccessors &modelAccess, const Boiler::gltf::Primitive &primitive);

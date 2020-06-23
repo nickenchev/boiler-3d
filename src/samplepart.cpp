@@ -122,6 +122,8 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample 
 	moveDown = false;
 	turnLeft = false;
 	turnRight = false;
+	lookUp = false;
+	lookDown = false;
 
 	camPosition = {0, 0, 10.0f};
 	camDirection = {0, 0, -1.0f};
@@ -206,6 +208,14 @@ void SamplePart::onStart()
 		{
 			turnRight = event.state == ButtonState::DOWN;
 		}
+		else if (event.keyCode == SDLK_UP)
+		{
+			lookUp = event.state == ButtonState::DOWN;
+		}
+		else if (event.keyCode == SDLK_DOWN)
+		{
+			lookDown = event.state == ButtonState::DOWN;
+		}
 	};
 	engine.addKeyInputListener(keyListener);
 }
@@ -248,14 +258,28 @@ void SamplePart::update(double deltaTime)
 		camPosition.y += 2.0f * deltaTime;
 	}
 
+	if (lookUp)
+	{
+		const glm::vec3 axis = glm::cross(camUp, camDirection);
+		camDirection = glm::rotate(camDirection, static_cast<float>(2.0f * deltaTime), axis);
+		camUp = glm::cross(camDirection, axis);
+	}
+	else if (lookDown)
+	{
+		const glm::vec3 axis = glm::cross(camUp, camDirection);
+		camDirection = glm::rotate(camDirection, static_cast<float>(-2.0f * deltaTime), axis);
+		camUp = glm::cross(camDirection, axis);
+	}
+
 	if (turnLeft)
 	{
-		camDirection = glm::rotate(camDirection, static_cast<float>(2.0f * deltaTime), camUp);
+		camDirection = glm::rotate(camDirection, static_cast<float>(1.0f * deltaTime), camUp);
 	}
 	else if (turnRight)
 	{
-		camDirection = glm::rotate(camDirection, static_cast<float>(-2.0f * deltaTime), camUp);
+		camDirection = glm::rotate(camDirection, static_cast<float>(-1.0f * deltaTime), camUp);
 	}
+
 
 	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 	engine.getRenderer().setViewMatrix(view);
