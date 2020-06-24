@@ -11,7 +11,7 @@ layout(location = 0) out vec4 outColour;
 
 void main()
 {
-	vec3 lightPosition = vec3(10, 2, 10);
+	vec3 lightPosition = vec3(5, 10, 5);
 	vec3 lightColour = vec3(1, 1, 1);
 	float ambientStrength = 0.01;
 	vec3 ambient = lightColour * ambientStrength;

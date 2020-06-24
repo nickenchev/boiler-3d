@@ -39,11 +39,24 @@ auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gl
 	}
 
 	std::vector<uint32_t> indices;
-	auto indexAccess = modelAccess.getTypedAccessor<unsigned short, 1>(primitive, primitive.indices.value());
-	for (auto values : indexAccess)
+	const auto &indexAccessor = modelAccess.getModel().accessors[primitive.indices.value()];
+	if (indexAccessor.componentType == 5123)
 	{
-		indices.push_back(values[0]);
+		auto indexAccess = modelAccess.getTypedAccessor<unsigned short, 1>(primitive, primitive.indices.value());
+		for (auto values : indexAccess)
+		{
+			indices.push_back(values[0]);
+		}
 	}
+	else if (indexAccessor.componentType == 5125)
+	{
+		auto indexAccess = modelAccess.getTypedAccessor<unsigned int, 1>(primitive, primitive.indices.value());
+		for (auto values : indexAccess)
+		{
+			indices.push_back(values[0]);
+		}
+	}
+	
 
 	const VertexData vertData(vertices, indices);
 	return engine.getRenderer().loadModel(vertData);
@@ -56,9 +69,13 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 	Entity nodeEntity = ecs.newEntity();
 
 	const gltf::Node &node = model.nodes[nodeIndex];
+	logger.log("Loading node: {}", node.name);
+
 	if (node.mesh.has_value())
 	{
 		const auto &mesh = model.meshes[node.mesh.value()];
+		logger.log("Loading mesh: {}", mesh.name);
+
 		auto renderComp = ecs.createComponent<RenderComponent>(nodeEntity);
 		for (auto &primitive : mesh.primitives)
 		{
@@ -83,7 +100,15 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 			node.translation.value()[2]
 		};
 	}
-	renderPos->rotationAxis = glm::vec3(0, 1, 0);
+	if (node.rotation.has_value())
+	{
+		renderPos->rotation.x = node.rotation.value()[0];
+		renderPos->rotation.y = node.rotation.value()[1];
+		renderPos->rotation.z = node.rotation.value()[2];
+		renderPos->rotation.w = node.rotation.value()[3];
+	}
+
+	//renderPos->rotationAxis = glm::vec3(0, 1, 0);
 
 	// if this node has children, create them and assign the current node as parent
 	if (node.children.size() > 0)
@@ -128,6 +153,7 @@ void SamplePart::onStart()
 	//std::string gltfFile{"data/monkey.gltf"};
 	//std::string gltfFile{"data/multi_test.gltf"};
 	//std::string gltfFile{"data/parent.gltf"};
+	//std::string gltfFile{"data/rotations.gltf"};
 	std::string gltfFile{"data/donut.gltf"};
 	//std::string gltfFile{"data/Box.gltf"};
 	//std::string gltfFile{"data/lantern/Lantern.gltf"};
@@ -143,22 +169,17 @@ void SamplePart::onStart()
 
 	auto model = Boiler::gltf::load(jsonString);
 
+	// load all of the buffers
 	std::vector<std::vector<std::byte>> buffers;
 	for (const auto &buffer : model.buffers)
 	{
 		buffers.push_back(loadBuffer("data/", buffer));
 	}
+
+	// Model accessors which are used for typed access into buffers
 	gltf::ModelAccessors modelAccess(model, std::move(buffers));
 
-	/*
-	const Boiler::gltf::Scene &scene = model.scenes[model.scene];
-	std::unordered_map<int, Entity> entityMap;
-	for (auto &nodeIndex : scene.nodes)
-	{
-		loadNode(model, modelAccess, entityMap, nodeIndex);
-	}
-	*/
-
+	// grab the default scene and load the node heirarchy
 	const gltf::Scene &scene = model.scenes[model.scene];
 	std::unordered_map<int, Entity> nodeEntities;
 	for (auto &nodeIndex : scene.nodes)
@@ -246,11 +267,11 @@ void SamplePart::update(double deltaTime)
 
 	if (moveUp)
 	{
-		camPosition.y -= 2.0f * deltaTime;
+		camPosition.y -= 1.0f * deltaTime;
 	}
 	else if (moveDown)
 	{
-		camPosition.y += 2.0f * deltaTime;
+		camPosition.y += 1.0f * deltaTime;
 	}
 
 	if (lookUp)
