@@ -52,46 +52,21 @@ auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gl
 Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors &modelAccess, std::unordered_map<int, Entity> &nodeEntities, int nodeIndex)
 {
 	SpriteSheetFrame sheetFrame(tex, nullptr);
-
 	EntityComponentSystem &ecs = engine.getEcs();
-	const auto &node = model.nodes[nodeIndex];
-
 	Entity nodeEntity = ecs.newEntity();
-	objects.push_back(nodeEntity);
-	nodeEntities[nodeIndex] = nodeEntity;
 
-	logger.log("Loading node: {} ({}), as entity #{}", node.name, nodeIndex, nodeEntity.getId());
-
-	// treat node's children
-	for (int childNodeIdx : node.children)
-	{
-		// check if this entity hasn't been processed
-		Entity childEntity;
-		if (nodeEntities.find(childNodeIdx) == nodeEntities.end())
-		{
-			childEntity = loadNode(model, modelAccess, nodeEntities, childNodeIdx);
-		}
-		else
-		{
-			childEntity = nodeEntities[childNodeIdx];
-		}
-		ecs.createComponent<ParentComponent>(childEntity, nodeEntity);
-	}
-
-	// if node has a mesh, ensure it is loaded
-	if (node.mesh)
+	const gltf::Node &node = model.nodes[nodeIndex];
+	if (node.mesh.has_value())
 	{
 		const auto &mesh = model.meshes[node.mesh.value()];
-
-		logger.log("Loading mesh with name: {}", mesh.name);
+		auto renderComp = ecs.createComponent<RenderComponent>(nodeEntity);
 		for (auto &primitive : mesh.primitives)
 		{
-			auto renderComp = ecs.createComponent<RenderComponent>(nodeEntity, loadPrimitive(modelAccess, primitive), sheetFrame);
+			renderComp->meshes.push_back(Mesh(loadPrimitive(modelAccess, primitive), sheetFrame));
 		}
 	}
-
-	// ensure each node has a transformation component
 	auto renderPos = ecs.createComponent<PositionComponent>(nodeEntity, Rect(0, 0, 0, 0));
+
 	if (node.scale.has_value())
 	{
 		renderPos->scale = {
@@ -109,6 +84,17 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 		};
 	}
 	renderPos->rotationAxis = glm::vec3(0, 1, 0);
+
+	// if this node has children, create them and assign the current node as parent
+	if (node.children.size() > 0)
+	{
+		for (int childIndex : node.children)
+		{
+			Entity childEntity = loadNode(model, modelAccess, nodeEntities, childIndex);
+			ecs.createComponent<ParentComponent>(childEntity, nodeEntity);
+		}
+	}
+
 	return nodeEntity;
 }
 
@@ -164,11 +150,20 @@ void SamplePart::onStart()
 	}
 	gltf::ModelAccessors modelAccess(model, std::move(buffers));
 
+	/*
 	const Boiler::gltf::Scene &scene = model.scenes[model.scene];
 	std::unordered_map<int, Entity> entityMap;
 	for (auto &nodeIndex : scene.nodes)
 	{
 		loadNode(model, modelAccess, entityMap, nodeIndex);
+	}
+	*/
+
+	const gltf::Scene &scene = model.scenes[model.scene];
+	std::unordered_map<int, Entity> nodeEntities;
+	for (auto &nodeIndex : scene.nodes)
+	{
+		loadNode(model, modelAccess, nodeEntities, nodeIndex);
 	}
 
     auto keyListener = [this](const KeyInputEvent &event)
