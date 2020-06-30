@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #include "SDL_keycode.h"
 #include "input/inputevent.h"
@@ -84,28 +86,41 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 	}
 	auto renderPos = ecs.createComponent<PositionComponent>(nodeEntity, Rect(0, 0, 0, 0));
 
-	if (node.scale.has_value())
+	// decompose a matrix if available, otherwise try to load transformations directly
+	if (node.matrix.has_value())
 	{
-		renderPos->scale = {
-			node.scale.value()[0],
-			node.scale.value()[1],
-			node.scale.value()[2]
-		};
+		const auto &matrixArray = node.matrix.value();
+		mat4 matrix = glm::make_mat4(matrixArray.data());
+		vec3 skew;
+		vec4 perspective;
+		glm::decompose(matrix, renderPos->scale, renderPos->orientation,
+					   renderPos->frame.position, skew, perspective);
 	}
-	if (node.translation.has_value())
+	else
 	{
-		renderPos->frame.position = {
-			node.translation.value()[0],
-			-node.translation.value()[1],
-			node.translation.value()[2]
-		};
-	}
-	if (node.rotation.has_value())
-	{
-		renderPos->rotation.x = node.rotation.value()[0];
-		renderPos->rotation.y = node.rotation.value()[1];
-		renderPos->rotation.z = node.rotation.value()[2];
-		renderPos->rotation.w = node.rotation.value()[3];
+		if (node.scale.has_value())
+		{
+			renderPos->scale = {
+				node.scale.value()[0],
+				node.scale.value()[1],
+				node.scale.value()[2]
+			};
+		}
+		if (node.translation.has_value())
+		{
+			renderPos->frame.position = {
+				node.translation.value()[0],
+				-node.translation.value()[1],
+				node.translation.value()[2]
+			};
+		}
+		if (node.rotation.has_value())
+		{
+			renderPos->orientation.x = node.rotation.value()[0];
+			renderPos->orientation.y = node.rotation.value()[1];
+			renderPos->orientation.z = node.rotation.value()[2];
+			renderPos->orientation.w = node.rotation.value()[3];
+		}
 	}
 
 	//renderPos->rotationAxis = glm::vec3(0, 1, 0);
@@ -147,18 +162,17 @@ void SamplePart::onStart()
 	SpriteSheetFrame sheetFrame(tex, nullptr);
 
 	engine.getRenderer().setClearColor({0, 0, 0});
-
+	std::string base = "/home/nenchev/Developer/projects/boiler-3d/data";
+	//std::string base = "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0";
+	std::string modelName = "parent";
+	std::string modelPath = fmt::format("/{}/glTF/", modelName);
+	std::string modelFile = fmt::format("{}.gltf", modelName);
+	std::string bufferPath{base + modelPath};
 	// load GLTF file
-	//std::string gltfFile{"data/blender_box.gltf"};
-	//std::string gltfFile{"data/monkey.gltf"};
-	//std::string gltfFile{"data/multi_test.gltf"};
-	//std::string gltfFile{"data/parent.gltf"};
-	//std::string gltfFile{"data/rotations.gltf"};
-	std::string gltfFile{"data/donut.gltf"};
-	//std::string gltfFile{"data/Box.gltf"};
-	//std::string gltfFile{"data/lantern/Lantern.gltf"};
-	//std::string gltfFile{"data/littlest_tokyo/scene.gltf"};
-	//std::string gltfFile{"data/glTF-Sample-Models-master/2.0/AnimatedMorphCube/glTF/AnimatedMorphCube.gltf"};
+	std::string gltfFile{base + modelPath + modelFile};
+
+	logger.log("Loading glTF: {}", gltfFile);
+
 	EntityComponentSystem &ecs = engine.getEcs();
     
 	std::ifstream infile(gltfFile);
@@ -173,7 +187,7 @@ void SamplePart::onStart()
 	std::vector<std::vector<std::byte>> buffers;
 	for (const auto &buffer : model.buffers)
 	{
-		buffers.push_back(loadBuffer("data/", buffer));
+		buffers.push_back(loadBuffer(bufferPath, buffer));
 	}
 
 	// Model accessors which are used for typed access into buffers
