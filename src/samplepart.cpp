@@ -33,32 +33,52 @@ auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gl
 		vertices.push_back(vertex);
 	}
 
-	auto normalAccess = modelAccess.getTypedAccessor<float, 3>(primitive, NORMAL);
-	unsigned int vertexIndex = 0;
-	for (auto normal : normalAccess)
+	if (primitive.attributes.find(NORMAL) != primitive.attributes.end())
 	{
-		vertices[vertexIndex++].normal = {normal[0], normal[1], normal[2]};
+		auto normalAccess = modelAccess.getTypedAccessor<float, 3>(primitive, NORMAL);
+		unsigned int vertexIndex = 0;
+		for (auto normal : normalAccess)
+		{
+			vertices[vertexIndex++].normal = {normal[0], normal[1], normal[2]};
+		}
+	}
+	else
+	{
+		// generate vertex normals
+		for (const auto &vertex : vertices)
+		{
+		}
 	}
 
 	std::vector<uint32_t> indices;
-	const auto &indexAccessor = modelAccess.getModel().accessors[primitive.indices.value()];
-	if (indexAccessor.componentType == 5123)
+	if (primitive.indices.has_value())
 	{
-		auto indexAccess = modelAccess.getTypedAccessor<unsigned short, 1>(primitive, primitive.indices.value());
-		for (auto values : indexAccess)
+		const auto &indexAccessor = modelAccess.getModel().accessors[primitive.indices.value()];
+		if (indexAccessor.componentType == 5123)
 		{
-			indices.push_back(values[0]);
+			auto indexAccess = modelAccess.getTypedAccessor<unsigned short, 1>(primitive, primitive.indices.value());
+			for (auto values : indexAccess)
+			{
+				indices.push_back(values[0]);
+			}
+		}
+		else if (indexAccessor.componentType == 5125)
+		{
+			auto indexAccess = modelAccess.getTypedAccessor<unsigned int, 1>(primitive, primitive.indices.value());
+			for (auto values : indexAccess)
+			{
+				indices.push_back(values[0]);
+			}
 		}
 	}
-	else if (indexAccessor.componentType == 5125)
+	else
 	{
-		auto indexAccess = modelAccess.getTypedAccessor<unsigned int, 1>(primitive, primitive.indices.value());
-		for (auto values : indexAccess)
+		// generate simple indices
+		for (long i = 0; i < vertices.size(); ++i)
 		{
-			indices.push_back(values[0]);
+			indices.push_back(i);
 		}
 	}
-	
 
 	const VertexData vertData(vertices, indices);
 	return engine.getRenderer().loadModel(vertData);
@@ -162,9 +182,9 @@ void SamplePart::onStart()
 	SpriteSheetFrame sheetFrame(tex, nullptr);
 
 	engine.getRenderer().setClearColor({0, 0, 0});
-	std::string base = "/home/nenchev/Developer/projects/boiler-3d/data";
-	//std::string base = "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0";
-	std::string modelName = "parent";
+	//std::string base = "/home/nenchev/Developer/projects/boiler-3d/data";
+	std::string base = "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0";
+	std::string modelName = "Fox";
 	std::string modelPath = fmt::format("/{}/glTF/", modelName);
 	std::string modelFile = fmt::format("{}.gltf", modelName);
 	std::string bufferPath{base + modelPath};
@@ -313,5 +333,4 @@ void SamplePart::update(double deltaTime)
 
 	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 	engine.getRenderer().setViewMatrix(view);
-
 }
