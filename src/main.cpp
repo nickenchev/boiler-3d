@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
 	//std::unique_ptr<Boiler::Renderer> renderer = std::make_unique<Boiler::OpenGLRenderer>(false);
 	Boiler::Engine engine(std::make_unique<Boiler::VulkanRenderer>());
-	engine.initialize(1024, 768);
+	engine.initialize(1920, 1080);
 
 	// create the part and start it
 	auto part = std::make_shared<SamplePart>(engine);

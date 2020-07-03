@@ -15,6 +15,7 @@
 #include "core/components/rendercomponent.h"
 #include "core/components/positioncomponent.h"
 #include "core/components/spritecomponent.h"
+#include "video/imaging/imageloader.h"
 
 using namespace Boiler;
 
@@ -50,6 +51,7 @@ auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gl
 		}
 	}
 
+	// load the primitive indices
 	std::vector<uint32_t> indices;
 	if (primitive.indices.has_value())
 	{
@@ -80,13 +82,25 @@ auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gl
 		}
 	}
 
+	// load texture coordinates
+	if (primitive.attributes.find(TEXCOORD_0) != primitive.attributes.end())
+	{
+		const auto &accessor = modelAccess.getModel().accessors[primitive.attributes.find(TEXCOORD_0)->second];
+		auto texCoordAccess = modelAccess.getTypedAccessor<float, 2>(accessor);
+
+		long vertexIdx = 0;
+		for (auto values : texCoordAccess)
+		{
+			vertices[vertexIdx++].textureCoordinate = {values[0], values[1]};
+		}
+	}
+
 	const VertexData vertData(vertices, indices);
 	return engine.getRenderer().loadModel(vertData);
 }
 
 Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors &modelAccess, std::unordered_map<int, Entity> &nodeEntities, int nodeIndex)
 {
-	SpriteSheetFrame sheetFrame(tex, nullptr);
 	EntityComponentSystem &ecs = engine.getEcs();
 	Entity nodeEntity = ecs.newEntity();
 
@@ -101,7 +115,21 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 		auto renderComp = ecs.createComponent<RenderComponent>(nodeEntity);
 		for (auto &primitive : mesh.primitives)
 		{
-			renderComp->meshes.push_back(Mesh(loadPrimitive(modelAccess, primitive), sheetFrame));
+			if (primitive.material.has_value())
+			{
+				const gltf::Material &material = model.materials[primitive.material.value()];
+				if (material.pbrMetallicRoughness.has_value() &&
+					material.pbrMetallicRoughness.value().baseColorTexture.has_value() &&
+					material.pbrMetallicRoughness.value().baseColorTexture.value().index.has_value())
+					
+				{
+					const auto &texture = textures[primitive.material.value()];
+					SpriteSheetFrame sheetFrame(texture, nullptr);
+
+					const auto model = loadPrimitive(modelAccess, primitive);
+					renderComp->meshes.push_back(Mesh(model, sheetFrame));
+				}
+			}
 		}
 	}
 	auto renderPos = ecs.createComponent<PositionComponent>(nodeEntity, Rect(0, 0, 0, 0));
@@ -178,13 +206,10 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample 
 
 void SamplePart::onStart()
 {
-	tex = engine.getImageLoader().loadImage("data/test.png");
-	SpriteSheetFrame sheetFrame(tex, nullptr);
-
 	engine.getRenderer().setClearColor({0, 0, 0});
 	//std::string base = "/home/nenchev/Developer/projects/boiler-3d/data";
 	std::string base = "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0";
-	std::string modelName = "Fox";
+	std::string modelName = "Sponza";
 	std::string modelPath = fmt::format("/{}/glTF/", modelName);
 	std::string modelFile = fmt::format("{}.gltf", modelName);
 	std::string bufferPath{base + modelPath};
@@ -208,6 +233,28 @@ void SamplePart::onStart()
 	for (const auto &buffer : model.buffers)
 	{
 		buffers.push_back(loadBuffer(bufferPath, buffer));
+	}
+
+	// load materials
+	textures.resize(model.materials.size());
+	for (int i = 0; i < model.materials.size(); ++i)
+	{
+		const gltf::Material &material = model.materials[i];
+		if (material.pbrMetallicRoughness.value().baseColorTexture.has_value())
+		{
+			const gltf::MaterialTexture &matTexture = material.pbrMetallicRoughness.value().baseColorTexture.value();
+			const gltf::Texture &texture = model.textures[matTexture.index.value()];
+			const gltf::Image &image = model.images[texture.source.value()];
+
+			if (image.uri.length() > 0)
+			{
+				const std::string imagePath = base + modelPath + image.uri;
+				const ImageData imageData = ImageLoader::load(imagePath);
+				auto texture = engine.getRenderer().createTexture(imagePath,
+					imageData.size, imageData.pixelData, imageData.colorComponents);
+				textures[i] = texture;
+			}
+		}
 	}
 
 	// Model accessors which are used for typed access into buffers

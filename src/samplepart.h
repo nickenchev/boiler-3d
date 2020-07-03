@@ -17,7 +17,7 @@ class SamplePart : public Boiler::Part
 	glm::vec3 camUp;
 
 	bool moveLeft, moveRight, moveCloser, moveFurther, moveUp, moveDown, turnLeft, turnRight, lookUp, lookDown;
-	std::shared_ptr<const Boiler::Texture> tex;
+	std::vector<std::shared_ptr<const Boiler::Texture>> textures;
 
 	auto loadPrimitive(const Boiler::gltf::ModelAccessors &modelAccess, const Boiler::gltf::Primitive &primitive);
 	Boiler::Entity loadNode(const Boiler::gltf::Model &model, const Boiler::gltf::ModelAccessors &modelAccess, std::unordered_map<int, Boiler::Entity> &nodeEntities, int nodeIndex);
