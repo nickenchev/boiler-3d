@@ -21,6 +21,10 @@ using namespace Boiler;
 
 auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gltf::Primitive &primitive)
 {
+	if (primitive.mode.has_value())
+	{
+		assert(primitive.mode == 4);
+	}
 	EntityComponentSystem &ecs = engine.getEcs();
 	using namespace gltf::attributes;
 
@@ -139,13 +143,18 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 	{
 		const auto &matrixArray = node.matrix.value();
 		mat4 matrix = glm::make_mat4(matrixArray.data());
-		vec3 skew;
+		vec3 scale, skew, position;
+		glm::quat orientation;
 		vec4 perspective;
-		glm::decompose(matrix, renderPos->scale, renderPos->orientation,
-					   renderPos->frame.position, skew, perspective);
+
+		glm::decompose(matrix, scale, orientation, position, skew, perspective);
+		renderPos->frame.position = position;
+		renderPos->scale = scale;
+		renderPos->orientation = glm::conjugate(orientation);
 	}
 	else
 	{
+		// otherwise load transformation directly
 		if (node.scale.has_value())
 		{
 			renderPos->scale = {
@@ -170,8 +179,6 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 			renderPos->orientation.w = node.rotation.value()[3];
 		}
 	}
-
-	//renderPos->rotationAxis = glm::vec3(0, 1, 0);
 
 	// if this node has children, create them and assign the current node as parent
 	if (node.children.size() > 0)
@@ -209,7 +216,7 @@ void SamplePart::onStart()
 	engine.getRenderer().setClearColor({0, 0, 0});
 	//std::string base = "/home/nenchev/Developer/projects/boiler-3d/data";
 	std::string base = "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0";
-	std::string modelName = "Sponza";
+	std::string modelName = "CesiumMan";
 	std::string modelPath = fmt::format("/{}/glTF/", modelName);
 	std::string modelFile = fmt::format("{}.gltf", modelName);
 	std::string bufferPath{base + modelPath};
@@ -323,36 +330,36 @@ void SamplePart::update(double deltaTime)
 	if (moveLeft)
 	{
 		glm::vec3 moveAmount = glm::cross(camDirection, camUp);
-		moveAmount *= deltaTime;
+		moveAmount *= deltaTime * 10.0f;
 		camPosition -= moveAmount;
 	}
 	else if (moveRight)
 	{
 		glm::vec3 moveAmount = glm::cross(camDirection, camUp);
-		moveAmount *= deltaTime;
+		moveAmount *= deltaTime * 10.0f;
 		camPosition += moveAmount;
 	}
 
 	if (moveCloser)
 	{
 		glm::vec3 moveAmount = camDirection;
-		moveAmount *= 3.0f * deltaTime;
+		moveAmount *= 10.0f * deltaTime;
 		camPosition -= moveAmount;
 	}
 	else if (moveFurther)
 	{
 		glm::vec3 moveAmount = camDirection;
-		moveAmount *= 3.0f * deltaTime;
+		moveAmount *= 10.0f * deltaTime;
 		camPosition += moveAmount;
 	}
 
 	if (moveUp)
 	{
-		camPosition.y -= 1.0f * deltaTime;
+		camPosition.y -= 10.0f * deltaTime;
 	}
 	else if (moveDown)
 	{
-		camPosition.y += 1.0f * deltaTime;
+		camPosition.y += 10.0f * deltaTime;
 	}
 
 	if (lookUp)
