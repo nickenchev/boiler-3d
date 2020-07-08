@@ -2,7 +2,6 @@
 #include <boiler.h>
 #include <video/vulkanrenderer.h>
 #include <video/openglrenderer.h>
-#include <video/sdlwindow.h>
 
 #include "samplepart.h"
 

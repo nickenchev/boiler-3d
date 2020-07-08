@@ -11,7 +11,7 @@ layout(location = 0) out vec4 outColor;
 
 void main()
 {
-	vec3 lightPosition = vec3(5, 10, 5);
+	vec3 lightPosition = vec3(75, 100, 5);
 	vec3 lightColour = vec3(1, 1, 1);
 	float ambientStrength = 0.01;
 	vec3 ambient = lightColour * ambientStrength;
@@ -23,6 +23,9 @@ void main()
 	vec3 diffuse = diff * lightColour;
 	
 	vec4 baseColor = texture(texSampler, fragTexCoord);
+	//if (baseColor.a < 0.5) // pass this into the shader
+		//discard;
+
 	vec4 finalColor = vec4(ambient + diffuse, 1) * baseColor;
 	outColor = finalColor;
 }

@@ -15,6 +15,7 @@
 #include "core/components/rendercomponent.h"
 #include "core/components/positioncomponent.h"
 #include "core/components/spritecomponent.h"
+#include "core/components/lightingcomponent.h"
 #include "video/imaging/imageloader.h"
 
 using namespace Boiler;
@@ -150,7 +151,7 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 		glm::decompose(matrix, scale, orientation, position, skew, perspective);
 		renderPos->frame.position = position;
 		renderPos->scale = scale;
-		renderPos->orientation = glm::conjugate(orientation);
+		renderPos->orientation = glm::conjugate(orientation); // TODO: https://stackoverflow.com/questions/17918033/glm-decompose-mat4-into-translation-and-rotation
 	}
 	else
 	{
@@ -216,7 +217,7 @@ void SamplePart::onStart()
 	engine.getRenderer().setClearColor({0, 0, 0});
 	//std::string base = "/home/nenchev/Developer/projects/boiler-3d/data";
 	std::string base = "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0";
-	std::string modelName = "CesiumMan";
+	std::string modelName = "Sponza";
 	std::string modelPath = fmt::format("/{}/glTF/", modelName);
 	std::string modelFile = fmt::format("{}.gltf", modelName);
 	std::string bufferPath{base + modelPath};
@@ -263,6 +264,13 @@ void SamplePart::onStart()
 			}
 		}
 	}
+
+	// setup lights
+	Entity light = ecs.newEntity();
+	auto lightComp = ecs.createComponent<LightingComponent>(light);
+	lightComp->lightId = engine.getRenderer().createLight();
+	lightComp->lightSource.position = vec3(10, 10, 10);
+	lightComp->lightSource.color = vec3(1, 1, 1);
 
 	// Model accessors which are used for typed access into buffers
 	gltf::ModelAccessors modelAccess(model, std::move(buffers));
@@ -326,40 +334,41 @@ void SamplePart::onStart()
 
 void SamplePart::update(double deltaTime)
 {
+	const float speed = 5.0f;
 	EntityComponentSystem &ecs = engine.getEcs();
 	if (moveLeft)
 	{
 		glm::vec3 moveAmount = glm::cross(camDirection, camUp);
-		moveAmount *= deltaTime * 10.0f;
+		moveAmount *= deltaTime * speed;
 		camPosition -= moveAmount;
 	}
 	else if (moveRight)
 	{
 		glm::vec3 moveAmount = glm::cross(camDirection, camUp);
-		moveAmount *= deltaTime * 10.0f;
+		moveAmount *= deltaTime * speed;
 		camPosition += moveAmount;
 	}
 
 	if (moveCloser)
 	{
 		glm::vec3 moveAmount = camDirection;
-		moveAmount *= 10.0f * deltaTime;
+		moveAmount *= speed * deltaTime;
 		camPosition -= moveAmount;
 	}
 	else if (moveFurther)
 	{
 		glm::vec3 moveAmount = camDirection;
-		moveAmount *= 10.0f * deltaTime;
+		moveAmount *= speed * deltaTime;
 		camPosition += moveAmount;
 	}
 
 	if (moveUp)
 	{
-		camPosition.y -= 10.0f * deltaTime;
+		camPosition.y -= speed * deltaTime;
 	}
 	else if (moveDown)
 	{
-		camPosition.y += 10.0f * deltaTime;
+		camPosition.y += speed * deltaTime;
 	}
 
 	if (lookUp)
@@ -377,11 +386,11 @@ void SamplePart::update(double deltaTime)
 
 	if (turnLeft)
 	{
-		camDirection = glm::rotate(camDirection, static_cast<float>(1.0f * deltaTime), camUp);
+		camDirection = glm::rotate(camDirection, static_cast<float>(5.0f * deltaTime), camUp);
 	}
 	else if (turnRight)
 	{
-		camDirection = glm::rotate(camDirection, static_cast<float>(-1.0f * deltaTime), camUp);
+		camDirection = glm::rotate(camDirection, static_cast<float>(-5.0f * deltaTime), camUp);
 	}
 
 
