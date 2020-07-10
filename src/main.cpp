@@ -7,7 +7,6 @@
 
 int main(int argc, char *argv[])
 {
-	//std::unique_ptr<Boiler::Renderer> renderer = std::make_unique<Boiler::OpenGLRenderer>(false);
 	Boiler::Engine engine(std::make_unique<Boiler::VulkanRenderer>());
 	engine.initialize(1280, 720);
 
