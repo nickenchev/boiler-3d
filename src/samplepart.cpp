@@ -6,6 +6,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <vector>
 
 #include "SDL_keycode.h"
 #include "input/inputevent.h"
@@ -26,6 +27,7 @@ auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gl
 	{
 		assert(primitive.mode == 4);
 	}
+
 	EntityComponentSystem &ecs = engine.getEcs();
 	using namespace gltf::attributes;
 
