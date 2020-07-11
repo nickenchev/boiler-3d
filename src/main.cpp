@@ -1,7 +1,6 @@
 #include <memory>
 #include <boiler.h>
 #include <video/vulkanrenderer.h>
-#include <video/openglrenderer.h>
 
 #include "samplepart.h"
 
