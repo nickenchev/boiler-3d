@@ -7,3 +7,5 @@ data/
 .dir-locals.el
 run.sh
 /renderdoc.cap
+.vs/
+CMakeSettings.json
