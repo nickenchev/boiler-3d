@@ -41,21 +41,13 @@ auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gl
 		vertices.push_back(vertex);
 	}
 
-	if (primitive.attributes.find(NORMAL) != primitive.attributes.end())
+	assert(primitive.attributes.find(NORMAL) != primitive.attributes.end());
+
+	auto normalAccess = modelAccess.getTypedAccessor<float, 3>(primitive, NORMAL);
+	unsigned int vertexIndex = 0;
+	for (auto normal : normalAccess)
 	{
-		auto normalAccess = modelAccess.getTypedAccessor<float, 3>(primitive, NORMAL);
-		unsigned int vertexIndex = 0;
-		for (auto normal : normalAccess)
-		{
-			vertices[vertexIndex++].normal = {normal[0], normal[1], normal[2]};
-		}
-	}
-	else
-	{
-		// generate vertex normals
-		for (const auto &vertex : vertices)
-		{
-		}
+		vertices[vertexIndex++].normal = {normal[0], normal[1], normal[2]};
 	}
 
 	// load the primitive indices
@@ -124,16 +116,13 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 		{
 			if (primitive.material.has_value())
 			{
-				const gltf::Material &material = model.materials[primitive.material.value()];
-				if (material.pbrMetallicRoughness.has_value() &&
-					material.pbrMetallicRoughness.value().baseColorTexture.has_value() &&
-					material.pbrMetallicRoughness.value().baseColorTexture.value().index.has_value())
-					
+				const Material &material = materials[primitive.material.value()];
+				if (material.baseTexture.has_value())
 				{
-					const auto &texture = textures[primitive.material.value()];
+					const auto &texture = materials[primitive.material.value()].baseTexture.value();
 					SpriteSheetFrame sheetFrame(texture, nullptr);
-
 					const auto model = loadPrimitive(modelAccess, primitive);
+
 					renderComp->meshes.push_back(Mesh(model, sheetFrame));
 				}
 			}
@@ -216,7 +205,7 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample 
 
 void SamplePart::onStart()
 {
-	engine.getRenderer().setClearColor({0, 0, 0});
+	engine.getRenderer().setClearColor({0.7f, 0.7f, 1});
 	//std::string base = "/home/nenchev/Developer/projects/boiler-3d/data";
 	std::string base = "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0";
 	std::string modelName = "Sponza";
@@ -246,9 +235,9 @@ void SamplePart::onStart()
 	}
 
 	// load materials
-	textures.resize(model.materials.size());
 	for (int i = 0; i < model.materials.size(); ++i)
 	{
+		Material newMaterial;
 		const gltf::Material &material = model.materials[i];
 		if (material.pbrMetallicRoughness.value().baseColorTexture.has_value())
 		{
@@ -260,17 +249,17 @@ void SamplePart::onStart()
 			{
 				const std::string imagePath = base + modelPath + image.uri;
 				const ImageData imageData = ImageLoader::load(imagePath);
-				auto texture = engine.getRenderer().createTexture(imagePath,
-					imageData.size, imageData.pixelData, imageData.colorComponents);
-				textures[i] = texture;
+				auto texture = engine.getRenderer().createTexture(imagePath, imageData);
+
+				newMaterial.baseTexture = texture;
 			}
 		}
+		materials.push_back(newMaterial);
 	}
 
 	// setup lights
 	Entity light = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(light);
-	lightComp->lightId = engine.getRenderer().createLight();
 	lightComp->lightSource.position = vec3(10, 10, 10);
 	lightComp->lightSource.color = vec3(1, 1, 1);
 

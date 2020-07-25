@@ -11,9 +11,9 @@ layout(location = 0) out vec4 outColor;
 
 void main()
 {
-	vec3 lightPosition = vec3(75, 100, 5);
+	vec3 lightPosition = vec3(0, 15, 0);
 	vec3 lightColour = vec3(1, 1, 1);
-	float ambientStrength = 0.01;
+	float ambientStrength = 0.04;
 	vec3 ambient = lightColour * ambientStrength;
 
 	// diffuse lighting
@@ -22,10 +22,19 @@ void main()
 	float diff = max(dot(norm, lightDirection), 0.0);
 	vec3 diffuse = diff * lightColour;
 	
+	// change sample position to simulate pixelation
+	/*float pixel_w = 13.3;
+	float pixel_h = 10;
+    float dx = pixel_w*(1./1024);
+    float dy = pixel_h*(1./768);
+    vec2 coord = vec2(dx*floor(fragTexCoord.x/dx),
+					  dy*floor(fragTexCoord.y/dy));*/
+	
 	vec4 baseColor = texture(texSampler, fragTexCoord);
+
 	//if (baseColor.a < 0.5) // pass this into the shader
 		//discard;
-
 	vec4 finalColor = vec4(ambient + diffuse, 1) * baseColor;
+
 	outColor = finalColor;
 }

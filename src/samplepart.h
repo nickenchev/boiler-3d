@@ -1,11 +1,11 @@
 #ifndef SAMPLEPART_H
 #define SAMPLEPART_H
 
-#include <memory>
 #include "boiler.h"
 #include "gltf.h"
 #include "typedaccessor.h"
 #include "modelaccessors.h"
+#include "video/material.h"
 
 class SamplePart : public Boiler::Part
 {
@@ -17,7 +17,7 @@ class SamplePart : public Boiler::Part
 	glm::vec3 camUp;
 
 	bool moveLeft, moveRight, moveCloser, moveFurther, moveUp, moveDown, turnLeft, turnRight, lookUp, lookDown;
-	std::vector<std::shared_ptr<const Boiler::Texture>> textures;
+	std::vector<Boiler::Material> materials;
 
 	auto loadPrimitive(const Boiler::gltf::ModelAccessors &modelAccess, const Boiler::gltf::Primitive &primitive);
 	Boiler::Entity loadNode(const Boiler::gltf::Model &model, const Boiler::gltf::ModelAccessors &modelAccess, std::unordered_map<int, Boiler::Entity> &nodeEntities, int nodeIndex);
