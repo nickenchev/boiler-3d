@@ -95,7 +95,7 @@ auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gl
 	}
 
 	const VertexData vertData(vertices, indices);
-	return engine.getRenderer().loadModel(vertData);
+	return engine.getRenderer().loadPrimitive(vertData);
 }
 
 Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors &modelAccess, std::unordered_map<int, Entity> &nodeEntities, int nodeIndex)
@@ -112,20 +112,16 @@ Entity SamplePart::loadNode(const gltf::Model &model, const gltf::ModelAccessors
 		logger.log("Loading mesh: {}", mesh.name);
 
 		auto renderComp = ecs.createComponent<RenderComponent>(nodeEntity);
-		for (auto &primitive : mesh.primitives)
+		for (auto &gltfPrimitive : mesh.primitives)
 		{
-			if (primitive.material.has_value())
+			Primitive meshPrimitive = loadPrimitive(modelAccess, gltfPrimitive);
+			// setup material if any
+			if (gltfPrimitive.material.has_value())
 			{
-				const Material &material = materials[primitive.material.value()];
-				if (material.baseTexture.has_value())
-				{
-					const auto &texture = materials[primitive.material.value()].baseTexture.value();
-					SpriteSheetFrame sheetFrame(texture, nullptr);
-					const auto model = loadPrimitive(modelAccess, primitive);
-
-					renderComp->meshes.push_back(Mesh(model, sheetFrame));
-				}
+				const MaterialId materialId = materialIds[gltfPrimitive.material.value()];
+				meshPrimitive.materialId = materialId;
 			}
+			renderComp->mesh.primitives.push_back(meshPrimitive);
 		}
 	}
 	auto renderPos = ecs.createComponent<PositionComponent>(nodeEntity, Rect(0, 0, 0, 0));
@@ -249,12 +245,14 @@ void SamplePart::onStart()
 			{
 				const std::string imagePath = base + modelPath + image.uri;
 				const ImageData imageData = ImageLoader::load(imagePath);
-				auto texture = engine.getRenderer().createTexture(imagePath, imageData);
 
+				// load the texture into GPU mem
+				auto texture = engine.getRenderer().loadTexture(imagePath, imageData);
 				newMaterial.baseTexture = texture;
 			}
 		}
-		materials.push_back(newMaterial);
+		MaterialId materialId = engine.getRenderSystem().addMaterial(newMaterial);
+		materialIds.push_back(materialId);
 	}
 
 	// setup lights
