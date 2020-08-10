@@ -8,10 +8,12 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <vector>
 
+#include "samplepart.h"
 #include "SDL_keycode.h"
 #include "input/inputevent.h"
 #include "samplepart.h"
 #include "core/entitycomponentsystem.h"
+#include "video/texture.h"
 #include "video/vertexdata.h"
 #include "core/components/rendercomponent.h"
 #include "core/components/positioncomponent.h"
@@ -27,7 +29,6 @@ auto SamplePart::loadPrimitive(const gltf::ModelAccessors &modelAccess, const gl
 	{
 		assert(primitive.mode == 4);
 	}
-
 	EntityComponentSystem &ecs = engine.getEcs();
 	using namespace gltf::attributes;
 
@@ -251,15 +252,28 @@ void SamplePart::onStart()
 				newMaterial.baseTexture = texture;
 			}
 		}
+		if (material.alphaMode == "BLEND")
+		{
+			newMaterial.alphaMode = AlphaMode::BLEND;
+		}
+		else if (material.alphaMode == "MASK")
+		{
+			newMaterial.alphaMode = AlphaMode::MASK;
+		}
+		else
+		{
+			newMaterial.alphaMode = AlphaMode::OPAQUE;
+		}
+		newMaterial.color = vec4(1, 1, 1, 1);
 		MaterialId materialId = engine.getRenderSystem().addMaterial(newMaterial);
 		materialIds.push_back(materialId);
 	}
 
-	// setup lights
-	Entity light = ecs.newEntity();
-	auto lightComp = ecs.createComponent<LightingComponent>(light);
-	lightComp->lightSource.position = vec3(10, 10, 10);
-	lightComp->lightSource.color = vec3(1, 1, 1);
+	LightSource light1({0, 10, 0}, {1, 1, 1});
+	light1.position = vec4(0, -10, 0, 0);
+	light1.color = vec4(0.3f, 0.3f, 0.3f, 1);
+	Entity eLight1 = ecs.newEntity();
+	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
 	// Model accessors which are used for typed access into buffers
 	gltf::ModelAccessors modelAccess(model, std::move(buffers));
@@ -274,7 +288,6 @@ void SamplePart::onStart()
 
     auto keyListener = [this](const KeyInputEvent &event)
 	{
-		const int maxTileSize = 100;
 		//EntityComponentSystem &ecs = engine.getEcs();
 
 		if (event.keyCode == SDLK_a)

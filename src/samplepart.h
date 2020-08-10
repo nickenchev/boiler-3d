@@ -2,6 +2,7 @@
 #define SAMPLEPART_H
 
 #include "boiler.h"
+#include "core/part.h"
 #include "core/materialid.h"
 #include "gltf.h"
 #include "typedaccessor.h"

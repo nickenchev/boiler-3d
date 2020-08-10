@@ -7,7 +7,6 @@
 #include <video/vulkanrenderer.h>
 
 #include "samplepart.h"
-#include "vulkan/vulkan_core.h"
 
 int main(int argc, char *argv[])
 {
