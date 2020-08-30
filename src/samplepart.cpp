@@ -202,7 +202,7 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample 
 
 void SamplePart::onStart()
 {
-	engine.getRenderer().setClearColor({0.7f, 0.7f, 1});
+	engine.getRenderer().setClearColor({0, 0, 0});
 	//std::string base = "/home/nenchev/Developer/projects/boiler-3d/data";
 	std::string base = "data/glTF-Sample-Models-master/2.0";
 	std::string modelName = "Sponza";
@@ -271,7 +271,7 @@ void SamplePart::onStart()
 
 	LightSource light1({0, 10, 0}, {1, 1, 1});
 	light1.position = vec4(0, -10, 0, 0);
-	light1.color = vec4(0.3f, 0.3f, 0.3f, 1);
+	light1.color = vec4(0.1, 0.1, 0.1, 1);
 	Entity eLight1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
