@@ -8,19 +8,28 @@ layout(location = 0) out vec4 outColor;
 
 void main()
 {
-	vec3 lightPosition = vec3(0, 10, 0);
+	vec4 fragPosition = subpassLoad(inPositions);
+	vec4 fragAlbedo = subpassLoad(inAlbedos);
+	vec4 fragNormal = subpassLoad(inNormals);
+
+	float lightRadius = 3;
+	vec3 lightPosition = vec3(0, -5, 0);
 	vec3 lightColour = vec3(1, 1, 1);
 	float ambientStrength = 0.02;
 	vec3 ambient = vec3(0.6, 0.6, 0.6) * ambientStrength;
 
 	// diffuse lighting
-	vec3 norm = normalize(vec3(subpassLoad(inNormals)));
-	vec3 lightDirection = normalize(lightPosition - vec3(subpassLoad(inPositions)));
+	vec3 norm = normalize(vec3(fragNormal));
+	vec3 lightDirection = normalize(lightPosition - vec3(fragPosition));
 	float diff = max(dot(norm, lightDirection), 0.0);
 	vec3 diffuse = diff * lightColour;
 	
-	vec4 albedo = subpassLoad(inAlbedos).rgba;
-	vec4 finalColor = vec4(ambient + diffuse, 1) * albedo;
+	// calculate if fragment is within light
+	float fragDist = distance(fragPosition.xyz, lightPosition.xyz);
+	
+	vec4 finalColor = (fragDist < lightRadius)
+		? fragAlbedo * vec4(ambient + diffuse, 1)
+		: fragAlbedo * vec4(ambient, 1);
 
 	outColor = finalColor;
 }
