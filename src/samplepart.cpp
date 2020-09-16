@@ -269,9 +269,7 @@ void SamplePart::onStart()
 		materialIds.push_back(materialId);
 	}
 
-	LightSource light1({0, 10, 0}, {1, 1, 1});
-	light1.position = vec4(0, -10, 0, 0);
-	light1.color = vec4(0.1, 0.1, 0.1, 1);
+	LightSource light1({0, 10, 0}, {0.5f, 0.5f, 0.5f});
 	Entity eLight1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
@@ -394,7 +392,6 @@ void SamplePart::update(double deltaTime)
 	{
 		camDirection = glm::rotate(camDirection, static_cast<float>(-5.0f * deltaTime), camUp);
 	}
-
 
 	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 	engine.getRenderer().setViewMatrix(view);

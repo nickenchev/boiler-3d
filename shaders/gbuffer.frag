@@ -5,17 +5,6 @@ layout(location = 1) in vec4 fragColor;
 layout(location = 2) in vec2 fragTexCoord;
 layout(location = 3) in vec3 fragNormal;
 
-struct LightSource
-{
-	vec4 position;
-	vec4 color;
-};
-
-layout(binding = 2) uniform Lights
-{
-	LightSource sources[64];
-} lights;
-
 layout(push_constant) uniform PrimitiveConstants
 {
 	vec4 color;
