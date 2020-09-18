@@ -205,7 +205,7 @@ void SamplePart::onStart()
 	engine.getRenderer().setClearColor({0, 0, 0});
 	//std::string base = "/home/nenchev/Developer/projects/boiler-3d/data";
 	std::string base = "data/glTF-Sample-Models-master/2.0";
-	std::string modelName = "Sponza";
+	std::string modelName = "FlightHelmet";
 	std::string modelPath = fmt::format("/{}/glTF/", modelName);
 	std::string modelFile = fmt::format("{}.gltf", modelName);
 	std::string bufferPath{base + modelPath};
@@ -269,7 +269,7 @@ void SamplePart::onStart()
 		materialIds.push_back(materialId);
 	}
 
-	LightSource light1({0, 10, 0}, {0.5f, 0.5f, 0.5f});
+	LightSource light1({0, 10, 0}, {1, 1, 1});
 	Entity eLight1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
@@ -395,4 +395,5 @@ void SamplePart::update(double deltaTime)
 
 	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 	engine.getRenderer().setViewMatrix(view);
+	engine.getRenderer().setCameraPosition(camPosition);
 }

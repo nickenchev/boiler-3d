@@ -23,5 +23,5 @@ void main()
 	fragPosition = vec3(mvp.model * vec4(vertPosition, 1.0));
 	fragColor = vertColor;
 	fragTexCoord = vertTexCoord;
-	fragNormal = mat3(transpose(inverse(mvp.model))) * vertNormal;
+	fragNormal = mat3(transpose(inverse(mvp.model))) * vertNormal; // TODO: Move the inversion to the CPU
 }
