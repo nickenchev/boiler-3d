@@ -20,7 +20,6 @@ layout(push_constant) uniform Constants
 	vec3 cameraPosition;
 } constants;
 
-
 layout(location = 0) out vec4 outColor;
 
 void main()
@@ -44,7 +43,7 @@ void main()
 	vec3 viewDir = normalize(constants.cameraPosition - vec3(fragPosition));
 	vec3 reflectDir = reflect(-lightDirection, normal);
 
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64);
 	vec3 specular = specularStrength * spec * lightColour;
 
 	vec4 result = vec4(ambient + diffuse + specular, 1.0) * fragAlbedo;
