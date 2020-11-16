@@ -14,6 +14,7 @@ layout(binding = 1) uniform sampler2D baseTexSampler;
 
 layout(binding = 2) uniform Material
 {
+	vec4 baseColorFactor;
 	bool useBaseTexture;
 } material;
 
@@ -26,11 +27,11 @@ void main()
 	outPosition = vec4(fragPosition, 1);
 	if (material.useBaseTexture) // add switch for this
 	{
-		outAlbedo = texture(baseTexSampler, fragTexCoord);
+		outAlbedo = texture(baseTexSampler, fragTexCoord) * material.baseColorFactor;
 	}
 	else
 	{
-		outAlbedo = fragColor;
+		outAlbedo = fragColor * material.baseColorFactor;
 	}
 	outNormal = vec4(fragNormal, 1);
 }

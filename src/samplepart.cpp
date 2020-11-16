@@ -47,10 +47,14 @@ void SamplePart::onStart()
 	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
 	Boiler::GLTFImporter gltfImporter;
+	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/parent/parents.gltf");
 	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf");
+	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/CesiumMan/glTF/CesiumMan.gltf");
+	gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/Buggy/glTF/Buggy.gltf");
+	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/WaterBottle/glTF/WaterBottle.gltf");
 	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/BrainStem/glTF/BrainStem.gltf");
 	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf");
-	gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/littlest_tokyo/glTF/littlest_tokyo.gltf");
+	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/littlest_tokyo/glTF/littlest_tokyo.gltf");
 	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/sea_house/scene.gltf");
 
     auto keyListener = [this](const KeyInputEvent &event)
@@ -131,23 +135,23 @@ void SamplePart::update(double deltaTime)
 
 	if (moveUp)
 	{
-		camPosition.y -= 10 * deltaTime;
+		camPosition.y += 10 * deltaTime;
 	}
 	else if (moveDown)
 	{
-		camPosition.y += 10 * deltaTime;
+		camPosition.y -= 10 * deltaTime;
 	}
 
 	if (lookUp)
 	{
 		const glm::vec3 axis = glm::cross(camUp, camDirection);
-		camDirection = glm::rotate(camDirection, static_cast<float>(10 * deltaTime), axis);
+		camDirection = glm::rotate(camDirection, static_cast<float>(-10 * deltaTime), axis);
 		camUp = glm::cross(camDirection, axis);
 	}
 	else if (lookDown)
 	{
 		const glm::vec3 axis = glm::cross(camUp, camDirection);
-		camDirection = glm::rotate(camDirection, static_cast<float>(-10 * deltaTime), axis);
+		camDirection = glm::rotate(camDirection, static_cast<float>(10 * deltaTime), axis);
 		camUp = glm::cross(camDirection, axis);
 	}
 
