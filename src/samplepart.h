@@ -7,6 +7,7 @@
 class SamplePart : public Boiler::Part
 {
 	Boiler::Logger logger;
+	std::string modelPath;
 
 	glm::vec3 camPosition;
 	glm::vec3 camDirection;
@@ -15,7 +16,7 @@ class SamplePart : public Boiler::Part
 	bool moveLeft, moveRight, moveCloser, moveFurther, moveUp, moveDown, turnLeft, turnRight, lookUp, lookDown;
 	
 public:
-    SamplePart(Boiler::Engine &engine);
+	SamplePart(Boiler::Engine &engine, const std::string &modelPath);
 
     void onStart() override;
     void update(double deltaTime) override;

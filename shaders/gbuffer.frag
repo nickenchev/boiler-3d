@@ -33,6 +33,9 @@ void main()
 	{
 		outAlbedo = fragColor * material.baseColorFactor;
 	}
+
+	if (outAlbedo.a < 0.7)
+		discard;
 	outNormal = vec4(fragNormal, 1);
 }
 

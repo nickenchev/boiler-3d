@@ -27,14 +27,14 @@ void main()
 	vec4 fragPosition = subpassLoad(inPositions);
 	vec4 fragAlbedo = subpassLoad(inAlbedos);
 	vec4 fragNormal = subpassLoad(inNormals);
-
+	
 	vec3 lightPosition = vec3(lights.sources[0].position);
 	vec3 lightColour = vec3(lights.sources[0].color);
 
-	float ambientStrength = 0.1;
+	float ambientStrength = 0.4;
 	vec3 ambient = ambientStrength * lightColour;
-
 	vec3 normal = normalize(vec3(fragNormal));
+
 	vec3 lightDirection = normalize(lightPosition - vec3(fragPosition));
 	float diff = max(dot(normal, lightDirection), 0);
 	vec3 diffuse = diff * lightColour;

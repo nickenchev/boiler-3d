@@ -19,8 +19,9 @@
 
 using namespace Boiler;
 
-SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample Part")
+SamplePart::SamplePart(Engine &engine, const std::string &modelPath) : Part("Sample", engine), logger("Sample Part")
 {
+	this->modelPath = modelPath;
 	moveLeft = false;
 	moveRight = false;
 	moveCloser = false;
@@ -32,30 +33,22 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample 
 	lookUp = false;
 	lookDown = false;
 
-	camPosition = {0, 0, 10.0f};
+	camPosition = {0, 0, 0};
 	camDirection = {0, 0, -1.0f};
 	camUp = {0, 1.0f, 0};
 }
 
 void SamplePart::onStart()
 {
-	engine.getRenderer().setClearColor({0, 0, 0});
+	engine.getRenderer().setClearColor({135, 206, 235});
 
 	EntityComponentSystem &ecs = engine.getEcs();
-	LightSource light1({0, 10, 0}, {1, 1, 1});
+	LightSource light1({0, 150, 0}, {1, 1, 1});
 	Entity eLight1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
 	Boiler::GLTFImporter gltfImporter;
-	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/parent/parents.gltf");
-	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf");
-	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/CesiumMan/glTF/CesiumMan.gltf");
-	gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/Buggy/glTF/Buggy.gltf");
-	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/WaterBottle/glTF/WaterBottle.gltf");
-	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/BrainStem/glTF/BrainStem.gltf");
-	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf");
-	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/littlest_tokyo/glTF/littlest_tokyo.gltf");
-	//gltfImporter.import(engine, "/home/nenchev/Developer/projects/boiler-3d/data/sea_house/scene.gltf");
+	gltfImporter.import(engine, modelPath);
 
     auto keyListener = [this](const KeyInputEvent &event)
 	{
@@ -105,7 +98,7 @@ void SamplePart::onStart()
 
 void SamplePart::update(double deltaTime)
 {
-	const float speed = 30.0f;
+	const float speed = 50.0f;
 	EntityComponentSystem &ecs = engine.getEcs();
 	if (moveLeft)
 	{
@@ -145,23 +138,23 @@ void SamplePart::update(double deltaTime)
 	if (lookUp)
 	{
 		const glm::vec3 axis = glm::cross(camUp, camDirection);
-		camDirection = glm::rotate(camDirection, static_cast<float>(-10 * deltaTime), axis);
+		camDirection = glm::rotate(camDirection, static_cast<float>(-3 * deltaTime), axis);
 		camUp = glm::cross(camDirection, axis);
 	}
 	else if (lookDown)
 	{
 		const glm::vec3 axis = glm::cross(camUp, camDirection);
-		camDirection = glm::rotate(camDirection, static_cast<float>(10 * deltaTime), axis);
+		camDirection = glm::rotate(camDirection, static_cast<float>(3 * deltaTime), axis);
 		camUp = glm::cross(camDirection, axis);
 	}
 
 	if (turnLeft)
 	{
-		camDirection = glm::rotate(camDirection, static_cast<float>(10 * deltaTime), camUp);
+		camDirection = glm::rotate(camDirection, static_cast<float>(3 * deltaTime), camUp);
 	}
 	else if (turnRight)
 	{
-		camDirection = glm::rotate(camDirection, static_cast<float>(-10 * deltaTime), camUp);
+		camDirection = glm::rotate(camDirection, static_cast<float>(-3 * deltaTime), camUp);
 	}
 
 	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
