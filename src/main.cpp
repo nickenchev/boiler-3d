@@ -11,20 +11,20 @@
 int main(int, char *[])
 {
 	std::vector<std::string> models {
-		"/home/nenchev/Developer/projects/boiler-3d/data/parent/parents.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/CesiumMan/glTF/CesiumMan.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/Buggy/glTF/Buggy.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/WaterBottle/glTF/WaterBottle.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/BrainStem/glTF/BrainStem.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/littlest_tokyo/glTF/littlest_tokyo.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/sea_house/scene.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/AnimatedCube/glTF/AnimatedCube.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/AnimatedTriangle/glTF/AnimatedTriangle.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/BoxAnimated/glTF/BoxAnimated.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/environment_for_firefox_reality/scene.gltf",
-		"/home/nenchev/Developer/projects/boiler-3d/data/Поляны 13/scene.gltf"
+		"data/parent/parents.gltf",
+		"data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf",
+		"data/glTF-Sample-Models-master/2.0/CesiumMan/glTF/CesiumMan.gltf",
+		"data/glTF-Sample-Models-master/2.0/Buggy/glTF/Buggy.gltf",
+		"data/glTF-Sample-Models-master/2.0/WaterBottle/glTF/WaterBottle.gltf",
+		"data/glTF-Sample-Models-master/2.0/BrainStem/glTF/BrainStem.gltf",
+		"data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf",
+		"data/littlest_tokyo/glTF/littlest_tokyo.gltf",
+		"data/sea_house/scene.gltf",
+		"data/glTF-Sample-Models-master/2.0/AnimatedCube/glTF/AnimatedCube.gltf",
+		"data/glTF-Sample-Models-master/2.0/AnimatedTriangle/glTF/AnimatedTriangle.gltf",
+		"data/glTF-Sample-Models-master/2.0/BoxAnimated/glTF/BoxAnimated.gltf",
+		"data/environment_for_firefox_reality/scene.gltf",
+		"data/Поляны 13/scene.gltf"
 	};
 
     for (size_t i = 0; i < models.size(); ++i)
