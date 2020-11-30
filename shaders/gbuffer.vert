@@ -12,11 +12,6 @@ layout(binding = 0) uniform ModelViewProjection
 	mat4 projection;
 } mvp;
 
-layout(push_constant) uniform Constants
-{
-	vec3 cameraPosition;
-} constants;
-
 layout(location = 0) out vec3 fragPosition;
 layout(location = 1) out vec4 fragColor;
 layout(location = 2) out vec2 fragTexCoord;

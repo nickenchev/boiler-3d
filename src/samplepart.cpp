@@ -33,7 +33,7 @@ SamplePart::SamplePart(Engine &engine, const std::string &modelPath) : Part("Sam
 	lookUp = false;
 	lookDown = false;
 
-	camPosition = {0, 0, 0};
+	camPosition = {0, 10, 10};
 	camDirection = {0, 0, -1.0f};
 	camUp = {0, 1.0f, 0};
 }
@@ -48,7 +48,12 @@ void SamplePart::onStart()
 	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
 	Boiler::GLTFImporter gltfImporter;
-	gltfImporter.import(engine, modelPath);
+	Boiler::ImportResult result = gltfImporter.import(engine, modelPath);
+
+    for (auto a : result.animations)
+	{
+        logger.log("Animation idx: {}", a);
+	}
 
     auto keyListener = [this](const KeyInputEvent &event)
 	{
@@ -92,13 +97,17 @@ void SamplePart::onStart()
 		{
 			lookDown = event.state == ButtonState::DOWN;
 		}
+		else if (event.keyCode == SDLK_r && event.state == ButtonState::UP)
+		{
+			engine.getAnimator().resetTime();
+		}
 	};
 	engine.addKeyInputListener(keyListener);
 }
 
 void SamplePart::update(double deltaTime)
 {
-	const float speed = 50.0f;
+	const float speed = 5.0f;
 	EntityComponentSystem &ecs = engine.getEcs();
 	if (moveLeft)
 	{
@@ -128,11 +137,11 @@ void SamplePart::update(double deltaTime)
 
 	if (moveUp)
 	{
-		camPosition.y += 10 * deltaTime;
+		camPosition.y += speed * deltaTime;
 	}
 	else if (moveDown)
 	{
-		camPosition.y -= 10 * deltaTime;
+		camPosition.y -= speed * deltaTime;
 	}
 
 	if (lookUp)

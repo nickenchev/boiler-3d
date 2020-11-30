@@ -8,10 +8,9 @@
 
 #include "samplepart.h"
 
-int main(int argc, char *argv[])
+int main(int, char *[])
 {
-	std::vector<std::string> models =
-	{
+	std::vector<std::string> models {
 		"/home/nenchev/Developer/projects/boiler-3d/data/parent/parents.gltf",
 		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf",
 		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/CesiumMan/glTF/CesiumMan.gltf",
@@ -22,9 +21,13 @@ int main(int argc, char *argv[])
 		"/home/nenchev/Developer/projects/boiler-3d/data/littlest_tokyo/glTF/littlest_tokyo.gltf",
 		"/home/nenchev/Developer/projects/boiler-3d/data/sea_house/scene.gltf",
 		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/AnimatedCube/glTF/AnimatedCube.gltf",
+		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/AnimatedTriangle/glTF/AnimatedTriangle.gltf",
+		"/home/nenchev/Developer/projects/boiler-3d/data/glTF-Sample-Models-master/2.0/BoxAnimated/glTF/BoxAnimated.gltf",
+		"/home/nenchev/Developer/projects/boiler-3d/data/environment_for_firefox_reality/scene.gltf",
+		"/home/nenchev/Developer/projects/boiler-3d/data/Поляны 13/scene.gltf"
 	};
 
-	for (int i = 0; i < models.size(); ++i)
+    for (size_t i = 0; i < models.size(); ++i)
 	{
 		std::cout << i << ") " << models[i] << std::endl;
 	}
@@ -33,15 +36,14 @@ int main(int argc, char *argv[])
 	std::cin >> choice;
 	std::string modelPath = models[choice];
 
-	Boiler::Size initialSize(1920, 1080);
+	Boiler::Size initialSize(1280, 720);
 
 	// create an SDL window
 	SDL_Window *win = nullptr;
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == 0)
 	{
-		SDL_WindowFlags winFlags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE |
-												 SDL_WINDOW_ALLOW_HIGHDPI |
-												 SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN | SDL_WINDOW_FULLSCREEN_DESKTOP);
+		SDL_WindowFlags winFlags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI |
+													 SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
 
         win = SDL_CreateWindow("Boiler", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                initialSize.width, initialSize.height, winFlags);
