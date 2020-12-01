@@ -28,22 +28,20 @@ SamplePart::SamplePart(Engine &engine, const std::string &modelPath) : Part("Sam
 	moveFurther = false;
 	moveUp = false;
 	moveDown = false;
-	turnLeft = false;
-	turnRight = false;
-	lookUp = false;
-	lookDown = false;
 
 	camPosition = {0, 10, 10};
 	camDirection = {0, 0, -1.0f};
 	camUp = {0, 1.0f, 0};
+	prevXFactor = 0;
+	prevYFactor = 0;
 }
 
 void SamplePart::onStart()
 {
-	engine.getRenderer().setClearColor({135, 206, 235});
+	engine.getRenderer().setClearColor({0, 0, 0});
 
 	EntityComponentSystem &ecs = engine.getEcs();
-	LightSource light1({0, 150, 0}, {1, 1, 1});
+	LightSource light1({0, 10, 0}, {0.96f, 0.87f, 0.46f}); // candle light colour
 	Entity eLight1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
@@ -54,6 +52,13 @@ void SamplePart::onStart()
 	{
         logger.log("Animation idx: {}", a);
 	}
+
+	auto mouseListener = [this](const MouseMotionEvent &event)
+	{
+		mouseMotion = event;
+	};
+
+	engine.addMouseMotionListener(mouseListener);
 
     auto keyListener = [this](const KeyInputEvent &event)
 	{
@@ -81,22 +86,6 @@ void SamplePart::onStart()
 		{
 			moveDown = event.state == ButtonState::DOWN;
 		}
-		else if (event.keyCode == SDLK_LEFT)
-		{
-			turnLeft = event.state == ButtonState::DOWN;
-		}
-		else if (event.keyCode == SDLK_RIGHT)
-		{
-			turnRight = event.state == ButtonState::DOWN;
-		}
-		else if (event.keyCode == SDLK_UP)
-		{
-			lookUp = event.state == ButtonState::DOWN;
-		}
-		else if (event.keyCode == SDLK_DOWN)
-		{
-			lookDown = event.state == ButtonState::DOWN;
-		}
 		else if (event.keyCode == SDLK_r && event.state == ButtonState::UP)
 		{
 			engine.getAnimator().resetTime();
@@ -107,7 +96,7 @@ void SamplePart::onStart()
 
 void SamplePart::update(double deltaTime)
 {
-	const float speed = 5.0f;
+	const float speed = 50.0f;
 	EntityComponentSystem &ecs = engine.getEcs();
 	if (moveLeft)
 	{
@@ -144,27 +133,28 @@ void SamplePart::update(double deltaTime)
 		camPosition.y -= speed * deltaTime;
 	}
 
-	if (lookUp)
-	{
-		const glm::vec3 axis = glm::cross(camUp, camDirection);
-		camDirection = glm::rotate(camDirection, static_cast<float>(-3 * deltaTime), axis);
-		camUp = glm::cross(camDirection, axis);
-	}
-	else if (lookDown)
-	{
-		const glm::vec3 axis = glm::cross(camUp, camDirection);
-		camDirection = glm::rotate(camDirection, static_cast<float>(3 * deltaTime), axis);
-		camUp = glm::cross(camDirection, axis);
-	}
+	// calculate mouse move factor based on current resolution
+	const Size size = engine.getRenderer().getScreenSize();
+	const float xFactorNew = mouseMotion.xDistance / size.width;
+	const float yFactorNew = mouseMotion.yDistance / size.height;
 
-	if (turnLeft)
-	{
-		camDirection = glm::rotate(camDirection, static_cast<float>(3 * deltaTime), camUp);
-	}
-	else if (turnRight)
-	{
-		camDirection = glm::rotate(camDirection, static_cast<float>(-3 * deltaTime), camUp);
-	}
+	const float alpha = 0.5f;
+	const float xFactor = prevXFactor + alpha * (xFactorNew - prevXFactor);
+	const float yFactor = prevYFactor + alpha * (yFactorNew - prevYFactor);
+
+	const float sensitivity = 200;
+	const float xDiff = sensitivity * xFactor;
+	const float yDiff = sensitivity * yFactor;
+
+	camDirection = glm::rotate(camDirection, static_cast<float>(-xDiff * deltaTime), camUp);
+	const glm::vec3 axis = glm::cross(camUp, camDirection);
+	camDirection = glm::rotate(camDirection, static_cast<float>(yDiff * deltaTime), axis);
+
+	prevXFactor = xFactor;
+	prevYFactor = yFactor;
+
+	mouseMotion.xDistance = 0;
+	mouseMotion.yDistance = 0;
 
 	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 	engine.getRenderer().setViewMatrix(view);
