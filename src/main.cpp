@@ -36,7 +36,7 @@ int main(int, char *[])
 	std::cin >> choice;
 	std::string modelPath = models[choice];
 
-	Boiler::Size initialSize(1600, 900);
+	Boiler::Size initialSize(1920, 1080);
 
 	// create an SDL window
 	SDL_Window *win = nullptr;
