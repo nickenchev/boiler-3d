@@ -36,7 +36,7 @@ int main(int, char *[])
 	std::cin >> choice;
 	std::string modelPath = models[choice];
 
-	Boiler::Size initialSize(1280, 720);
+	Boiler::Size initialSize(1600, 900);
 
 	// create an SDL window
 	SDL_Window *win = nullptr;
@@ -45,7 +45,7 @@ int main(int, char *[])
 		SDL_WindowFlags winFlags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI |
 													 SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
 
-        win = SDL_CreateWindow("Boiler", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        win = SDL_CreateWindow("Boiler", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                initialSize.width, initialSize.height, winFlags);
 
 		if (!win)
@@ -57,6 +57,7 @@ int main(int, char *[])
     {
 		throw std::runtime_error("Error Initializing SDL: " + std::string(SDL_GetError()));
     }
+	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	// Vulkan extensions required by SDL
 	unsigned int extCount = 0;
