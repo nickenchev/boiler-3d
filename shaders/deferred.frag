@@ -31,8 +31,10 @@ void main()
 	vec3 lightPosition = vec3(lights.sources[0].position);
 	vec3 lightColour = vec3(lights.sources[0].color);
 
-	float ambientStrength = 0.2;
-	vec3 ambient = ambientStrength * lightColour;
+	float ambientStrength = 0.1;
+	vec3 ambientColour = vec3(0, 0.33, 0.647);
+	vec3 ambient = ambientStrength * ambientColour;
+
 	vec3 normal = normalize(vec3(fragNormal));
 
 	vec3 lightDirection = normalize(lightPosition - vec3(fragPosition));
