@@ -24,7 +24,8 @@ int main(int, char *[])
 		"data/glTF-Sample-Models-master/2.0/AnimatedTriangle/glTF/AnimatedTriangle.gltf",
 		"data/glTF-Sample-Models-master/2.0/BoxAnimated/glTF/BoxAnimated.gltf",
 		"data/environment_for_firefox_reality/scene.gltf",
-		"data/Поляны 13/scene.gltf"
+		"data/Поляны 13/scene.gltf",
+		"data/blender/test-terrain.gltf"
 	};
 
     for (size_t i = 0; i < models.size(); ++i)
@@ -33,10 +34,10 @@ int main(int, char *[])
 	}
 
 	int choice = 0;
-	std::cin >> choice;
-	std::string modelPath = models[choice];
+	//std::cin >> choice;
+	std::string modelPath = (choice != 0) ? models[choice] : "";
 
-	Boiler::Size initialSize(1920, 1080);
+	Boiler::Size initialSize(1280, 720);
 
 	// create an SDL window
 	SDL_Window *win = nullptr;
