@@ -1,9 +1,11 @@
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <SDL.h>
 #include <SDL_vulkan.h>
 
-#include <memory>
 #include <boiler.h>
-#include <vector>
 #include <video/vulkanrenderer.h>
 
 #include "samplepart.h"
@@ -34,7 +36,7 @@ int main(int, char *[])
 	}
 
 	int choice = 0;
-	//std::cin >> choice;
+	std::cin >> choice;
 	std::string modelPath = (choice != 0) ? models[choice] : "";
 
 	Boiler::Size initialSize(1280, 720);
@@ -48,7 +50,6 @@ int main(int, char *[])
 
         win = SDL_CreateWindow("Boiler", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                initialSize.width, initialSize.height, winFlags);
-
 		if (!win)
 		{
 			throw std::runtime_error("Unable to create main window");
@@ -74,7 +75,7 @@ int main(int, char *[])
 	renderer->setSurface(surface);
 
 	// setup the engine itself
-	Boiler::Engine engine(renderer.get());
+	static Boiler::Engine engine(renderer.get());
 	engine.initialize(initialSize);
 
 	// create the part and start it

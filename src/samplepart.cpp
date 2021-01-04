@@ -14,7 +14,9 @@
 #include "core/entitycomponentsystem.h"
 #include "assets/gltfimporter.h"
 
+#include "core/components/rendercomponent.h"
 #include "core/components/lightingcomponent.h"
+#include "core/components/transformcomponent.h"
 
 
 using namespace Boiler;
@@ -46,47 +48,47 @@ void SamplePart::onStart()
 	Entity eLight1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
-	Boiler::GLTFImporter gltfImporter;
-
-	if (modelPath != "")
+	if (modelPath.length() > 0)
 	{
-		Boiler::ImportResult worldResult = gltfImporter.import(engine, modelPath);
+		Boiler::GLTFImporter envGltf(engine, modelPath);
+		Entity scene = ecs.newEntity();
+		envGltf.createInstance(scene);
 	}
 	else
 	{
-		Boiler::ImportResult worldResult = gltfImporter.import(engine, "data/blender/test-terrain.gltf");
+		Boiler::GLTFImporter envGltf(engine, "data/blender/test-terrain.gltf");
+		Entity scene = ecs.newEntity();
+		envGltf.createInstance(scene);
 
-		Boiler::ImportResult cubeResult = gltfImporter.import(engine, "data/glTF-Sample-Models-master/2.0/AnimatedCube/glTF/AnimatedCube.gltf");
-		Entity animatedCube = cubeResult.entities[0];
-		auto &cubePos = ecs.getComponentStore().retrieve<TransformComponent>(animatedCube);
-		cubePos.setPosition(vec3(5, 1, 15));
+		Boiler::GLTFImporter mechGltf(engine, "data/xyz_draft._tank/scene.gltf");
+		Entity mech = ecs.newEntity();
+		mechGltf.createInstance(mech);
 
-		Boiler::ImportResult enemy1Result = gltfImporter.import(engine, "data/vedova_nera/scene.gltf");
-		Entity renegade = enemy1Result.entities[0];
-		auto &renPos = ecs.getComponentStore().retrieve<TransformComponent>(renegade);
-		renPos.setScale(vec3(0.2f, 0.2f, 0.2f));
-		renPos.setPosition(vec3(0, 0, 15));
-
-		Boiler::ImportResult mechResult = gltfImporter.import(engine, "data/xyz_draft._tank/scene.gltf");
-		Entity mech = mechResult.entities[0];
-		auto &mechPos = ecs.getComponentStore().retrieve<TransformComponent>(mech);
-		mechPos.setScale(vec3(0.2f, 0.2f, 0.2f));
-		mechPos.setPosition(vec3(3, 0, 10));
-
-		int x = -10;
-		for (int i = 0; i < 3; ++i)
+		Boiler::GLTFImporter gltfImporter(engine, "data/sorceress/scene.gltf");
+		for (int x = 0, z = 30, c = 1; c <= 64; ++c)
 		{
-			Boiler::ImportResult sorceressResult = gltfImporter.import(engine, "data/sorceress/scene.gltf");
-			Entity sor = sorceressResult.entities[0];
-			auto &pos = ecs.getComponentStore().retrieve<TransformComponent>(sor);
-			pos.setScale(0.001f);
-			pos.setPosition(vec3(x, 1, 10));
-			x += 2;
+			Entity sor = ecs.newEntity();
+			gltfImporter.createInstance(sor);
+			auto &transform = ecs.getComponentStore().retrieve<TransformComponent>(sor);
+			transform.setScale(0.001f);
+			transform.setPosition(x, 1, z);
+
+			if (c % 8 == 0)
+			{
+				x = 0;
+				z -= 10;
+			}
+			else
+			{
+				x += 5;
+			}
 		}
 	}
 
 	auto mouseListener = [this](const MouseMotionEvent &event)
 	{
+		mouseMotion = event; // moving this to the bottom allows for interpolation
+
 		// calculate mouse move factor based on current resolution
 		const Size size = engine.getRenderer().getScreenSize();
 		const float xFactorNew = event.xDistance / size.width;
@@ -106,8 +108,6 @@ void SamplePart::onStart()
 
 		prevXFactor = xFactor;
 		prevYFactor = yFactor;
-
-		mouseMotion = event;
 	};
 
 	engine.addMouseMotionListener(mouseListener);
@@ -148,7 +148,7 @@ void SamplePart::onStart()
 
 void SamplePart::update(double deltaTime)
 {
-	const float speed = 5.0f;
+	const float speed = 10.0f;
 	EntityComponentSystem &ecs = engine.getEcs();
 	if (moveLeft)
 	{
