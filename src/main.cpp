@@ -10,35 +10,16 @@
 
 #include "samplepart.h"
 
-int main(int, char *[])
+int main(int argc, char *argv[])
 {
-	std::vector<std::string> models {
-		"data/parent/parents.gltf",
-		"data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf",
-		"data/glTF-Sample-Models-master/2.0/CesiumMan/glTF/CesiumMan.gltf",
-		"data/glTF-Sample-Models-master/2.0/Buggy/glTF/Buggy.gltf",
-		"data/glTF-Sample-Models-master/2.0/WaterBottle/glTF/WaterBottle.gltf",
-		"data/glTF-Sample-Models-master/2.0/BrainStem/glTF/BrainStem.gltf",
-		"data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf",
-		"data/littlest_tokyo/glTF/littlest_tokyo.gltf",
-		"data/sea_house/scene.gltf",
-		"data/glTF-Sample-Models-master/2.0/AnimatedCube/glTF/AnimatedCube.gltf",
-		"data/glTF-Sample-Models-master/2.0/AnimatedTriangle/glTF/AnimatedTriangle.gltf",
-		"data/glTF-Sample-Models-master/2.0/BoxAnimated/glTF/BoxAnimated.gltf",
-		"data/environment_for_firefox_reality/scene.gltf",
-		"data/Поляны 13/scene.gltf",
-		"data/blender/test-terrain.gltf"
-	};
-
-    for (size_t i = 0; i < models.size(); ++i)
+	bool enableDebug = false;
+	if (argc > 1)
 	{
-		std::cout << i << ") " << models[i] << std::endl;
+		if (std::strcmp(argv[1], "-debug") == 0)
+		{
+			enableDebug = true;
+		}
 	}
-
-	int choice = 0;
-	std::cin >> choice;
-	std::string modelPath = (choice != 0) ? models[choice] : "";
-
 	Boiler::Size initialSize(1280, 720);
 
 	// create an SDL window
@@ -69,7 +50,7 @@ int main(int, char *[])
 	SDL_Vulkan_GetInstanceExtensions(win, &extCount, extensions.data());
 
 	// create the renderer and surface
-	auto renderer = std::make_unique<Boiler::Vulkan::VulkanRenderer>(extensions);
+	auto renderer = std::make_unique<Boiler::Vulkan::VulkanRenderer>(extensions, enableDebug);
 	VkSurfaceKHR surface = VK_NULL_HANDLE;
 	SDL_Vulkan_CreateSurface(win, renderer->getVulkanInstance(), &surface);
 	renderer->setSurface(surface);
@@ -79,7 +60,7 @@ int main(int, char *[])
 	engine.initialize(initialSize);
 
 	// create the part and start it
-	auto part = std::make_shared<SamplePart>(engine, modelPath);
+	auto part = std::make_shared<SamplePart>(engine);
 	engine.start(part);
 
 	SDL_DestroyWindow(win);

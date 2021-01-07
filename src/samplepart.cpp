@@ -21,9 +21,8 @@
 
 using namespace Boiler;
 
-SamplePart::SamplePart(Engine &engine, const std::string &modelPath) : Part("Sample", engine), logger("Sample Part")
+SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample Part")
 {
-	this->modelPath = modelPath;
 	moveLeft = false;
 	moveRight = false;
 	moveCloser = false;
@@ -48,11 +47,28 @@ void SamplePart::onStart()
 	Entity eLight1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
-	if (modelPath.length() > 0)
+	if (true)
 	{
-		Boiler::GLTFImporter envGltf(engine, modelPath);
-		Entity scene = ecs.newEntity();
-		envGltf.createInstance(scene);
+		Boiler::GLTFImporter envGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
+
+		Entity scene1 = ecs.newEntity();
+		envGltf.createInstance(scene1);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene1).setScale(0.1f);
+
+		Entity scene2 = ecs.newEntity();
+		envGltf.createInstance(scene2);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene2).setScale(0.1f);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene2).setPosition(60, 0, 0);
+
+		Entity scene3 = ecs.newEntity();
+		envGltf.createInstance(scene3);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene3).setScale(0.1f);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene3).setPosition(0, 0, 60);
+
+		Entity scene4 = ecs.newEntity();
+		envGltf.createInstance(scene4);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene4).setScale(0.1f);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene4).setPosition(60, 0, 60);
 	}
 	else
 	{
@@ -140,15 +156,21 @@ void SamplePart::onStart()
 		}
 		else if (event.keyCode == SDLK_r && event.state == ButtonState::UP)
 		{
-			engine.getAnimator().resetTime();
+			//engine.getAnimator().resetTime();
+		}
+		else if (event.keyCode == SDLK_l && event.state == ButtonState::UP)
+		{
+			std::string path;
+			std::cout << "boiler: ";
+			std::cin >> path;
 		}
 	};
 	engine.addKeyInputListener(keyListener);
 }
 
-void SamplePart::update(double deltaTime)
+void SamplePart::update(Boiler::Time deltaTime)
 {
-	const float speed = 10.0f;
+	const float speed = 20.0f;
 	EntityComponentSystem &ecs = engine.getEcs();
 	if (moveLeft)
 	{

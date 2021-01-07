@@ -2,13 +2,13 @@
 #define SAMPLEPART_H
 
 #include "boiler.h"
+#include "core/common.h"
 #include "core/part.h"
 #include "input/mousemotionevent.h"
 
 class SamplePart : public Boiler::Part
 {
 	Boiler::Logger logger;
-	std::string modelPath;
 
 	Boiler::MouseMotionEvent mouseMotion;
 	float prevXFactor, prevYFactor;
@@ -20,10 +20,10 @@ class SamplePart : public Boiler::Part
 	bool moveLeft, moveRight, moveCloser, moveFurther, moveUp, moveDown;
 	
 public:
-	SamplePart(Boiler::Engine &engine, const std::string &modelPath);
+	SamplePart(Boiler::Engine &engine);
 
     void onStart() override;
-    void update(double deltaTime) override;
+    void update(Boiler::Time deltaTime) override;
 };
 
 #endif /* SAMPLEPART_H */
