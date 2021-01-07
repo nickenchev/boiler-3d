@@ -18,7 +18,6 @@
 #include "core/components/lightingcomponent.h"
 #include "core/components/transformcomponent.h"
 
-
 using namespace Boiler;
 
 SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample Part")
@@ -30,7 +29,7 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample 
 	moveUp = false;
 	moveDown = false;
 
-	camPosition = {0, 10, 10};
+	camPosition = {0, 50, 0};
 	camDirection = {0, 0, -1.0f};
 	camUp = {0, 1.0f, 0};
 	prevXFactor = 0;
@@ -47,29 +46,29 @@ void SamplePart::onStart()
 	Entity eLight1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
 
+	const auto makeScene = [this, &ecs](const GLTFImporter &import, vec3 offset)
+	{
+		Entity scene1 = ecs.newEntity();
+		import.createInstance(scene1);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene1).setScale(0.1f);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene1).setPosition(offset);
+
+		for (AnimationId id : import.getImportResult().animations)
+		{
+			auto &animComp = ecs.getComponentStore().retrieve<AnimationComponent>(scene1);
+			animComp.addClip(engine.getAnimator().createClip(0, id, true));
+		}
+	};
+
 	if (true)
 	{
 		const float posDiff = 56;
 		Boiler::GLTFImporter envGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
 
-		Entity scene1 = ecs.newEntity();
-		envGltf.createInstance(scene1);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene1).setScale(0.1f);
-
-		Entity scene2 = ecs.newEntity();
-		envGltf.createInstance(scene2);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene2).setScale(0.1f);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene2).setPosition(posDiff, 0, 0);
-
-		Entity scene3 = ecs.newEntity();
-		envGltf.createInstance(scene3);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene3).setScale(0.1f);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene3).setPosition(0, 0, posDiff);
-
-		Entity scene4 = ecs.newEntity();
-		envGltf.createInstance(scene4);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene4).setScale(0.1f);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene4).setPosition(posDiff, 0, posDiff);
+		makeScene(envGltf, vec3(0, 0, 0));
+		makeScene(envGltf, vec3(posDiff, 0, 0));
+		makeScene(envGltf, vec3(0, 0, posDiff));
+		makeScene(envGltf, vec3(posDiff, 0, posDiff));
 	}
 	else
 	{
