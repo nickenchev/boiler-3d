@@ -49,6 +49,7 @@ void SamplePart::onStart()
 
 	if (true)
 	{
+		const float posDiff = 56;
 		Boiler::GLTFImporter envGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
 
 		Entity scene1 = ecs.newEntity();
@@ -58,17 +59,17 @@ void SamplePart::onStart()
 		Entity scene2 = ecs.newEntity();
 		envGltf.createInstance(scene2);
 		ecs.getComponentStore().retrieve<TransformComponent>(scene2).setScale(0.1f);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene2).setPosition(60, 0, 0);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene2).setPosition(posDiff, 0, 0);
 
 		Entity scene3 = ecs.newEntity();
 		envGltf.createInstance(scene3);
 		ecs.getComponentStore().retrieve<TransformComponent>(scene3).setScale(0.1f);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene3).setPosition(0, 0, 60);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene3).setPosition(0, 0, posDiff);
 
 		Entity scene4 = ecs.newEntity();
 		envGltf.createInstance(scene4);
 		ecs.getComponentStore().retrieve<TransformComponent>(scene4).setScale(0.1f);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene4).setPosition(60, 0, 60);
+		ecs.getComponentStore().retrieve<TransformComponent>(scene4).setPosition(posDiff, 0, posDiff);
 	}
 	else
 	{
