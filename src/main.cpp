@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		Boiler::Size initialSize(1280, 720);
+		Boiler::Size initialSize(1920, 1080);
 
 		// create an SDL window
 		SDL_Window *win = nullptr;

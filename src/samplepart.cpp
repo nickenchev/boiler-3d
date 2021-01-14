@@ -13,6 +13,7 @@
 #include "input/inputevent.h"
 #include "core/entitycomponentsystem.h"
 #include "assets/gltfimporter.h"
+#include "video/skyboxloader.h"
 
 #include "core/components/rendercomponent.h"
 #include "core/components/lightingcomponent.h"
@@ -59,6 +60,12 @@ void SamplePart::onStart()
 			animComp.addClip(engine.getAnimator().createClip(0, id, true));
 		}
 	};
+
+	// skybox
+	SkyBoxLoader skyLoader(engine.getRenderer(), ecs);
+	skyLoader.load("data/skybox/opengltutorial/top.jpg", "data/skybox/opengltutorial/bottom.jpg",
+				   "data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
+				   "data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
 	if (true)
 	{
