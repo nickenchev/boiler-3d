@@ -30,7 +30,7 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample 
 	moveUp = false;
 	moveDown = false;
 
-	camPosition = {0, 50, 0};
+	camPosition = {5, 5, 0};
 	camDirection = {0, 0, -1.0f};
 	camUp = {0, 1.0f, 0};
 	prevXFactor = 0;
@@ -42,71 +42,21 @@ void SamplePart::onStart()
 	engine.getRenderer().setClearColor({0, 0, 0});
 
 	EntityComponentSystem &ecs = engine.getEcs();
-	//LightSource light1({0, 50, 50}, {0.96f, 0.87f, 0.46f}); // candle light colour
-	LightSource light1({0, 50, 50}, {1, 1, 1});
-	Entity eLight1 = ecs.newEntity();
-	auto lightComp = ecs.createComponent<LightingComponent>(eLight1, light1);
-
-	const auto makeScene = [this, &ecs](const GLTFImporter &import, vec3 offset)
-	{
-		Entity scene1 = ecs.newEntity();
-		import.createInstance(scene1);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene1).setScale(0.1f);
-		ecs.getComponentStore().retrieve<TransformComponent>(scene1).setPosition(offset);
-
-		for (AnimationId id : import.getImportResult().animations)
-		{
-			auto &animComp = ecs.getComponentStore().retrieve<AnimationComponent>(scene1);
-			animComp.addClip(engine.getAnimator().createClip(0, id, true));
-		}
-	};
+	LightSource lightSource1({0, 50, 50}, {1, 1, 1});
+	light1 = ecs.newEntity();
+	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
 	// skybox
 	SkyBoxLoader skyLoader(engine.getRenderer(), ecs);
-	skyLoader.load("data/skybox/opengltutorial/top.jpg", "data/skybox/opengltutorial/bottom.jpg",
-				   "data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
-				   "data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
+	skyBox = skyLoader.load("data/skybox/opengltutorial/top.jpg", "data/skybox/opengltutorial/bottom.jpg",
+							"data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
+							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
-	if (true)
-	{
-		const float posDiff = 56;
-		Boiler::GLTFImporter envGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
-
-		makeScene(envGltf, vec3(0, 0, 0));
-		makeScene(envGltf, vec3(posDiff, 0, 0));
-		makeScene(envGltf, vec3(0, 0, posDiff));
-		makeScene(envGltf, vec3(posDiff, 0, posDiff));
-	}
-	else
-	{
-		Boiler::GLTFImporter envGltf(engine, "data/blender/test-terrain.gltf");
-		Entity scene = ecs.newEntity();
-		envGltf.createInstance(scene);
-
-		Boiler::GLTFImporter mechGltf(engine, "data/xyz_draft._tank/scene.gltf");
-		Entity mech = ecs.newEntity();
-		mechGltf.createInstance(mech);
-
-		Boiler::GLTFImporter gltfImporter(engine, "data/sorceress/scene.gltf");
-		for (int x = 0, z = 30, c = 1; c <= 64; ++c)
-		{
-			Entity sor = ecs.newEntity();
-			gltfImporter.createInstance(sor);
-			auto &transform = ecs.getComponentStore().retrieve<TransformComponent>(sor);
-			transform.setScale(0.001f);
-			transform.setPosition(x, 1, z);
-
-			if (c % 8 == 0)
-			{
-				x = 0;
-				z -= 10;
-			}
-			else
-			{
-				x += 5;
-			}
-		}
-	}
+	//Boiler::GLTFImporter groundGltf(engine, "data/blender/ground.gltf");
+	Boiler::GLTFImporter groundGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
+	Entity ground = ecs.newEntity();
+	groundGltf.createInstance(ground);
+	//ecs.getComponentStore().retrieve<TransformComponent>(ground).setScale(0.1);
 
 	auto mouseListener = [this](const MouseMotionEvent &event)
 	{
@@ -217,4 +167,6 @@ void SamplePart::update(Boiler::Time deltaTime)
 	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 	engine.getRenderer().setViewMatrix(view);
 	engine.getRenderer().setCameraPosition(camPosition);
+
+	ecs.getComponentStore().retrieve<TransformComponent>(skyBox).setPosition(camPosition);
 }

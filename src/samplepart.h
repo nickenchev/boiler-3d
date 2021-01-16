@@ -18,6 +18,7 @@ class SamplePart : public Boiler::Part
 	glm::vec3 camUp;
 
 	bool moveLeft, moveRight, moveCloser, moveFurther, moveUp, moveDown;
+	Boiler::Entity skyBox, light1;
 	
 public:
 	SamplePart(Boiler::Engine &engine);
