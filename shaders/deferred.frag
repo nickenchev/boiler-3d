@@ -3,6 +3,7 @@
 layout (input_attachment_index = 0, set = 0, binding = 0) uniform subpassInput inPositions;
 layout (input_attachment_index = 1, set = 0, binding = 1) uniform subpassInput inAlbedos;
 layout (input_attachment_index = 2, set = 0, binding = 2) uniform subpassInput inNormals;
+layout (input_attachment_index = 3, set = 0, binding = 3) uniform subpassInput inDepths;
 
 struct LightSource
 {
@@ -32,7 +33,7 @@ void main()
 	vec3 lightColour = vec3(lights.sources[0].color);
 
 	float ambientStrength = 0.1;
-	vec3 ambientColour = vec3(0, 0.33, 0.647);
+	vec3 ambientColour = vec3(1, 1, 1);
 	vec3 ambient = ambientStrength * ambientColour;
 
 	vec3 normal = normalize(vec3(fragNormal));
@@ -50,5 +51,6 @@ void main()
 
 	vec4 result = vec4(ambient + diffuse + specular, 1.0) * fragAlbedo;
 	outColor = result;
+
 }
 

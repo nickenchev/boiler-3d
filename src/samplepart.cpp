@@ -42,7 +42,7 @@ void SamplePart::onStart()
 	engine.getRenderer().setClearColor({0, 0, 0});
 
 	EntityComponentSystem &ecs = engine.getEcs();
-	LightSource lightSource1({0, 50, 50}, {1, 1, 1});
+	LightSource lightSource1({20, 50, 0}, {1, 1, 1});
 	light1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
@@ -56,12 +56,10 @@ void SamplePart::onStart()
 	Boiler::GLTFImporter groundGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
 	Entity ground = ecs.newEntity();
 	groundGltf.createInstance(ground);
-	//ecs.getComponentStore().retrieve<TransformComponent>(ground).setScale(0.1);
+	ecs.getComponentStore().retrieve<TransformComponent>(ground).setScale(0.1);
 
 	auto mouseListener = [this](const MouseMotionEvent &event)
 	{
-		mouseMotion = event; // moving this to the bottom allows for interpolation
-
 		// calculate mouse move factor based on current resolution
 		const Size size = engine.getRenderer().getScreenSize();
 		const float xFactorNew = event.xDistance / size.width;
@@ -70,8 +68,10 @@ void SamplePart::onStart()
 		const float alpha = 0.5f;
 		const float xFactor = prevXFactor + alpha * (xFactorNew - prevXFactor);
 		const float yFactor = prevYFactor + alpha * (yFactorNew - prevYFactor);
+		//const float xFactor = xFactorNew;
+		//const float yFactor = yFactorNew;
 
-		const float sensitivity = 1.5;
+		const float sensitivity = 1.75;
 		const float xDiff = sensitivity * xFactor;
 		const float yDiff = sensitivity * yFactor;
 
@@ -79,8 +79,8 @@ void SamplePart::onStart()
 		const glm::vec3 axis = glm::cross(camUp, camDirection);
 		camDirection = glm::rotate(camDirection, static_cast<float>(yDiff), axis);
 
-		prevXFactor = xFactor;
-		prevYFactor = yFactor;
+		prevXFactor = xFactorNew;
+		prevYFactor = yFactorNew;
 	};
 
 	engine.addMouseMotionListener(mouseListener);
@@ -167,6 +167,4 @@ void SamplePart::update(Boiler::Time deltaTime)
 	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 	engine.getRenderer().setViewMatrix(view);
 	engine.getRenderer().setCameraPosition(camPosition);
-
-	ecs.getComponentStore().retrieve<TransformComponent>(skyBox).setPosition(camPosition);
 }

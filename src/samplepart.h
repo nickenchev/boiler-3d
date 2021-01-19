@@ -10,7 +10,6 @@ class SamplePart : public Boiler::Part
 {
 	Boiler::Logger logger;
 
-	Boiler::MouseMotionEvent mouseMotion;
 	float prevXFactor, prevYFactor;
 
 	glm::vec3 camPosition;

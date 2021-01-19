@@ -24,14 +24,11 @@ layout(push_constant) uniform Constants
 	int materialId;
 } constants;
 
-layout(location = 0) out vec4 outPosition;
-layout(location = 1) out vec4 outAlbedo;
-layout(location = 2) out vec4 outNormal;
+layout(location = 0) out vec4 outColor;
 
 void main()
 {
 	Material material = materials.data[constants.materialId];
-	outPosition = vec4(fragPosition, 1);
-	outAlbedo = texture(cubeSampler, fragTexCoord);
+	outColor = texture(cubeSampler, fragTexCoord);
 }
 
