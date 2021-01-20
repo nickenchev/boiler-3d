@@ -54,6 +54,7 @@ void SamplePart::onStart()
 
 	//Boiler::GLTFImporter groundGltf(engine, "data/blender/ground.gltf");
 	Boiler::GLTFImporter groundGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
+	//Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf");
 	Entity ground = ecs.newEntity();
 	groundGltf.createInstance(ground);
 	ecs.getComponentStore().retrieve<TransformComponent>(ground).setScale(0.1);
