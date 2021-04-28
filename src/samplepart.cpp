@@ -53,11 +53,12 @@ void SamplePart::onStart()
 							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
 	//Boiler::GLTFImporter groundGltf(engine, "data/blender/ground.gltf");
+	//Boiler::GLTFImporter groundGltf(engine, "data/blender/test-terrain.gltf");
 	Boiler::GLTFImporter groundGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf");
 	Entity ground = ecs.newEntity();
 	groundGltf.createInstance(ground);
-	ecs.getComponentStore().retrieve<TransformComponent>(ground).setScale(0.1);
+	//ecs.getComponentStore().retrieve<TransformComponent>(ground).setScale//(0.1);
 
 	auto mouseListener = [this](const MouseMotionEvent &event)
 	{
@@ -72,7 +73,7 @@ void SamplePart::onStart()
 		//const float xFactor = xFactorNew;
 		//const float yFactor = yFactorNew;
 
-		const float sensitivity = 1.75;
+		const float sensitivity = 1.5;
 		const float xDiff = sensitivity * xFactor;
 		const float yDiff = sensitivity * yFactor;
 

@@ -51,6 +51,5 @@ void main()
 
 	vec4 result = vec4(ambient + diffuse + specular, 1.0) * fragAlbedo;
 	outColor = result;
-
 }
 
