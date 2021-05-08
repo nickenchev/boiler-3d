@@ -52,13 +52,20 @@ void SamplePart::onStart()
 							"data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
 							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
-	//Boiler::GLTFImporter groundGltf(engine, "data/blender/ground.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/blender/test-terrain.gltf");
 	Boiler::GLTFImporter groundGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
+	//Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf");
 	Entity ground = ecs.newEntity();
 	groundGltf.createInstance(ground);
-	//ecs.getComponentStore().retrieve<TransformComponent>(ground).setScale//(0.1);
+
+	//ecs.getComponentStore().retrieve<TransformComponent>(ground).setScale(0.1f);
+
+	auto &animComp = ecs.getComponentStore().retrieve<AnimationComponent>(ground);
+	for (AnimationId animId : groundGltf.getImportResult().animations)
+	{
+		animComp.addClip(Clip(0, animId, true));
+	}
 
 	auto mouseListener = [this](const MouseMotionEvent &event)
 	{
@@ -129,7 +136,7 @@ void SamplePart::onStart()
 
 void SamplePart::update(Boiler::Time deltaTime)
 {
-	const float speed = 20.0f;
+	const float speed = 2;
 	EntityComponentSystem &ecs = engine.getEcs();
 	if (moveLeft)
 	{
@@ -165,6 +172,9 @@ void SamplePart::update(Boiler::Time deltaTime)
 	{
 		camPosition.y -= speed * deltaTime;
 	}
+
+	auto &lightComp = ecs.getComponentStore().retrieve<LightingComponent>(light1);
+	lightComp.source.position = vec4(camPosition, 1);
 
 	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 	engine.getRenderer().setViewMatrix(view);
