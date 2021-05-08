@@ -36,7 +36,7 @@ void main()
 	Material material = materials.data[constants.materialId];
 	
 	outPosition = vec4(fragPosition, 1);
-	if (true) // add switch for this
+	if (USE_TEXTURE) // add switch for this
 	{
 		outAlbedo = texture(baseTexSampler, fragTexCoord) * material.baseColorFactor;
 	}
