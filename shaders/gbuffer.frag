@@ -2,6 +2,8 @@
 
 #define MAX_MATERIALS 256
 
+layout(constant_id = 0) const bool USE_TEXTURE = false;
+
 layout(location = 0) in vec3 fragPosition;
 layout(location = 1) in vec4 fragColor;
 layout(location = 2) in vec2 fragTexCoord;
@@ -10,7 +12,6 @@ layout(location = 3) in vec3 fragNormal;
 struct Material
 {
 	vec4 baseColorFactor;
-	bool useBaseTexture;
 };
 
 layout(set = 0, binding = 2) uniform Materials
@@ -35,7 +36,7 @@ void main()
 	Material material = materials.data[constants.materialId];
 	
 	outPosition = vec4(fragPosition, 1);
-	if (material.useBaseTexture) // add switch for this
+	if (true) // add switch for this
 	{
 		outAlbedo = texture(baseTexSampler, fragTexCoord) * material.baseColorFactor;
 	}
