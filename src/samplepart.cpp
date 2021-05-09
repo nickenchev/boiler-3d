@@ -30,7 +30,7 @@ SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample 
 	moveUp = false;
 	moveDown = false;
 
-	camPosition = {5, 5, 0};
+	camPosition = {0, 0, 0};
 	camDirection = {0, 0, -1.0f};
 	camUp = {0, 1.0f, 0};
 	prevXFactor = 0;
@@ -42,7 +42,7 @@ void SamplePart::onStart()
 	engine.getRenderer().setClearColor({0, 0, 0});
 
 	EntityComponentSystem &ecs = engine.getEcs();
-	LightSource lightSource1({20, 50, 0}, {1, 1, 1});
+	LightSource lightSource1({0, 50, 0}, {0.8, 0.8, 0.8});
 	light1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
@@ -52,12 +52,23 @@ void SamplePart::onStart()
 							"data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
 							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
+	//Boiler::GLTFImporter groundGltf(engine, "data/blender/ground.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/blender/test-terrain.gltf");
-	Boiler::GLTFImporter groundGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
-	//Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf");
+	//Boiler::GLTFImporter groundGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
+	Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf");
 	Entity ground = ecs.newEntity();
 	groundGltf.createInstance(ground);
+
+	Boiler::GLTFImporter sorceress(engine, "data/sorceress/scene.gltf");
+	Entity sorc = ecs.newEntity();
+	sorceress.createInstance(sorc);
+	auto &transform = ecs.getComponentStore().retrieve<TransformComponent>(sorc);
+	transform.setScale(0.001f);
+	transform.setPosition(0, 1, 0);
+
+	//const auto q = glm::angleAxis(glm::radians(180.0f), glm::vec3(0, 1, 0));
+	//transform.setOrientation(q);
 
 	//ecs.getComponentStore().retrieve<TransformComponent>(ground).setScale(0.1f);
 
@@ -136,7 +147,7 @@ void SamplePart::onStart()
 
 void SamplePart::update(Boiler::Time deltaTime)
 {
-	const float speed = 2;
+	const float speed = 1;
 	EntityComponentSystem &ecs = engine.getEcs();
 	if (moveLeft)
 	{
@@ -172,9 +183,6 @@ void SamplePart::update(Boiler::Time deltaTime)
 	{
 		camPosition.y -= speed * deltaTime;
 	}
-
-	auto &lightComp = ecs.getComponentStore().retrieve<LightingComponent>(light1);
-	lightComp.source.position = vec4(camPosition, 1);
 
 	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 	engine.getRenderer().setViewMatrix(view);
