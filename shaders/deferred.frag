@@ -7,6 +7,7 @@ layout (input_attachment_index = 3, set = 0, binding = 3) uniform subpassInput i
 
 struct LightSource
 {
+	int type;
 	vec4 position;
 	vec4 color;
 };

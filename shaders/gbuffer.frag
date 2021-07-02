@@ -9,6 +9,12 @@ layout(location = 1) in vec4 fragColor;
 layout(location = 2) in vec2 fragTexCoord;
 layout(location = 3) in vec3 fragNormal;
 
+layout(push_constant) uniform Constants
+{
+	int matrixId;
+	int materialId;
+} constants;
+
 struct Material
 {
 	vec4 baseColorFactor;
@@ -21,12 +27,6 @@ layout(set = 0, binding = 2) uniform Materials
 
 layout(set = 1, binding = 0) uniform sampler2D baseTexSampler;
 
-layout(push_constant) uniform Constants
-{
-	int matrixId;
-	int materialId;
-} constants;
-
 layout(location = 0) out vec4 outPosition;
 layout(location = 1) out vec4 outAlbedo;
 layout(location = 2) out vec4 outNormal;
@@ -36,7 +36,7 @@ void main()
 	Material material = materials.data[constants.materialId];
 	
 	outPosition = vec4(fragPosition, 1);
-	if (USE_TEXTURE) // add switch for this
+	if (USE_TEXTURE)
 	{
 		outAlbedo = texture(baseTexSampler, fragTexCoord) * material.baseColorFactor;
 	}
