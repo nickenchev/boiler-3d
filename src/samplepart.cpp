@@ -6,6 +6,8 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+
+
 #include <vector>
 
 #include "samplepart.h"
@@ -52,10 +54,10 @@ void SamplePart::onStart()
 							"data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
 							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
-	//Boiler::GLTFImporter groundGltf(engine, "data/blender/ground.gltf");
+	Boiler::GLTFImporter groundGltf(engine, "data/blender/ground.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/blender/test-terrain.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
-	Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf");
+	//Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf");
 	Entity ground = ecs.newEntity();
 	groundGltf.createInstance(ground);
