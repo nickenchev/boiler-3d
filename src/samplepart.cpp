@@ -44,7 +44,7 @@ void SamplePart::onStart()
 	engine.getRenderer().setClearColor({0, 0, 0});
 
 	EntityComponentSystem &ecs = engine.getEcs();
-	LightSource lightSource1({0, 50, 0}, {0.8, 0.8, 0.8});
+	LightSource lightSource1({0, 10, 0}, {0.8, 0.8, 0.8});
 	light1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
@@ -54,11 +54,11 @@ void SamplePart::onStart()
 							"data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
 							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
-	Boiler::GLTFImporter groundGltf(engine, "data/blender/ground.gltf");
+	//Boiler::GLTFImporter groundGltf(engine, "data/blender/ground.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/blender/test-terrain.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/littlest_tokyo/glTF/littlest_tokyo.gltf");
 	//Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/VC/glTF/VC.gltf");
-	//Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf");
+	Boiler::GLTFImporter groundGltf(engine, "data/glTF-Sample-Models-master/2.0/Sponza/glTF/Sponza.gltf");
 	Entity ground = ecs.newEntity();
 	groundGltf.createInstance(ground);
 
