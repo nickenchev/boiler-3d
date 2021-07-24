@@ -8,7 +8,6 @@ layout(location = 2) in vec3 fragTexCoord;
 struct Material
 {
 	vec4 baseColorFactor;
-	bool useBaseTexture;
 };
 
 layout(set = 0, binding = 2) uniform Materials
