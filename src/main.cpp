@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 			SDL_WindowFlags winFlags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
 
 			win = SDL_CreateWindow("Boiler", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-								   initialSize.width, initialSize.height, winFlags);
+				initialSize.width, initialSize.height, winFlags);
 			if (!win)
 			{
 				std::cout << "Window Error: " << SDL_GetError() << std::endl;

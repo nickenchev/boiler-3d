@@ -39,6 +39,7 @@ void main()
 	vec3 normal = normalize(vec3(fragNormal));
 
 	vec3 lightDirection = normalize(lightPosition - vec3(fragPosition));
+	//vec3 lightDirection = normalize(lightPosition);
 	float diff = max(dot(normal, lightDirection), 0);
 	vec3 diffuse = diff * lightColour;
 
