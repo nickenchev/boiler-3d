@@ -57,14 +57,6 @@ void SamplePart::onStart()
 							"data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
 							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
-	/*
-	auto &animComp = ecs.getComponentStore().retrieve<AnimationComponent>(ground);
-	for (AnimationId animId : groundGltf.getImportResult().animations)
-	{
-		animComp.addClip(Clip(0, animId, true));
-	}
-	*/
-
 	auto mouseListener = [this](const MouseMotionEvent &event)
 	{
 		// calculate mouse move factor based on current resolution
