@@ -58,10 +58,6 @@ void SamplePart::onStart()
 							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
 	/*
-	Boiler::GLTFImporter groundGltf(engine, "data/level-test.gltf");
-	Entity ground = ecs.newEntity();
-	groundGltf.createInstance(ground);
-
 	auto &animComp = ecs.getComponentStore().retrieve<AnimationComponent>(ground);
 	for (AnimationId animId : groundGltf.getImportResult().animations)
 	{
