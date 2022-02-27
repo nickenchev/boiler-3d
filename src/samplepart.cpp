@@ -49,7 +49,7 @@ void SamplePart::onStart()
 	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
 	MapLoader mapLoader(engine);
-	mapLoader.load("data/level.json");
+	mapLoader.load("data/collision-test.json");
 
 	// skybox
 	SkyBoxLoader skyLoader(engine.getRenderer(), ecs);
