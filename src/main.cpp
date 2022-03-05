@@ -7,9 +7,10 @@
 #include <SDL_vulkan.h>
 
 #include <boiler.h>
-#include <video/vulkanrenderer.h>
+#include <display/vulkanrenderer.h>
 
 #include "samplepart.h"
+#include "gui/imguivulkan.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		Boiler::Size initialSize(1920, 1080);
+		Boiler::Size initialSize(1600, 900);
 
 		// create an SDL window
 		SDL_Window *win = nullptr;
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
 
 		// setup the engine itself
 		static Boiler::Engine engine(renderer.get());
-		engine.initialize(initialSize);
+		engine.initialize(std::make_unique<Boiler::ImGuiVulkan>(*renderer), initialSize);
 
 		// create the part and start it
 		auto part = std::make_shared<SamplePart>(engine);

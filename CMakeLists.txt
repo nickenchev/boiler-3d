@@ -14,5 +14,5 @@ add_executable(boiler3d
   src/main.cpp
   src/samplepart.cpp)
 
-target_include_directories(boiler3d INTERFACE boiler)
+target_include_directories(boiler3d PRIVATE boiler)
 target_link_libraries(boiler3d boiler)

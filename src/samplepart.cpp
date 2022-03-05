@@ -7,14 +7,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-
 #include <vector>
 
 #include "samplepart.h"
 #include "SDL_keycode.h"
 #include "input/inputevent.h"
 #include "core/entitycomponentsystem.h"
-#include "video/skyboxloader.h"
+#include "display/skyboxloader.h"
 #include "assets/maps/maploader.h"
 
 #include "core/components/rendercomponent.h"
