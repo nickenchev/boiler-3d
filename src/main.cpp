@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include <SDL.h>
-#include <SDL_vulkan.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_vulkan.h>
 
 #include <boiler.h>
 #include <display/vulkanrenderer.h>

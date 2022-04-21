@@ -1,21 +1,23 @@
+#include <vector>
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
+
+#include <SDL2/SDL_keycode.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-#include <vector>
-
 #include "samplepart.h"
-#include "SDL_keycode.h"
 #include "input/inputevent.h"
 #include "core/entitycomponentsystem.h"
 #include "display/skyboxloader.h"
 #include "assets/maps/maploader.h"
 
+#include "collision/collisionsystem.h"
+#include "collision/collisioncomponent.h"
 #include "core/components/rendercomponent.h"
 #include "core/components/lightingcomponent.h"
 #include "core/components/transformcomponent.h"
@@ -43,12 +45,16 @@ void SamplePart::onStart()
 	engine.getRenderer().setClearColor({0, 0, 0});
 
 	EntityComponentSystem &ecs = engine.getEcs();
+	ecs.getComponentSystems().registerSystem<CollisionSystem>()
+		.expects<CollisionComponent>()
+		.expects<TransformComponent>();
+
 	LightSource lightSource1({-30, 20, 0}, {0.8, 0.8, 0.8});
 	light1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
 	MapLoader mapLoader(engine);
-	mapLoader.load("data/collision-test.json");
+	mapLoader.load("data/level.json");
 
 	// skybox
 	SkyBoxLoader skyLoader(engine.getRenderer(), ecs);
