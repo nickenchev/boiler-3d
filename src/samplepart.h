@@ -9,14 +9,6 @@
 class SamplePart : public Boiler::Part
 {
 	Boiler::Logger logger;
-
-	float prevXFactor, prevYFactor;
-
-	glm::vec3 camPosition;
-	glm::vec3 camDirection;
-	glm::vec3 camUp;
-
-	bool moveLeft, moveRight, moveCloser, moveFurther, moveUp, moveDown;
 	Boiler::Entity skyBox, light1;
 	
 public:
