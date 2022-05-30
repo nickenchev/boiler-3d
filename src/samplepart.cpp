@@ -16,14 +16,13 @@
 #include "display/skyboxloader.h"
 #include "assets/maps/maploader.h"
 
-#include "physics/collisionsystem.h"
-#include "physics/collisioncomponent.h"
 #include "core/components/rendercomponent.h"
 #include "core/components/lightingcomponent.h"
 #include "core/components/transformcomponent.h"
 #include "input/inputcomponent.h"
 #include "camera/cameracomponent.h"
 #include "physics/movementcomponent.h"
+#include "physics/collisioncomponent.h"
 
 using namespace Boiler;
 
@@ -36,75 +35,20 @@ void SamplePart::onStart()
 	engine.getRenderer().setClearColor({0, 0, 0});
 
 	EntityComponentSystem &ecs = engine.getEcs();
-	ecs.getComponentSystems().registerSystem<CollisionSystem>()
-		.expects<CollisionComponent>()
-		.expects<TransformComponent>();
-
 	LightSource lightSource1({-30, 20, 0}, {0.8, 0.8, 0.8});
 	light1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
-	MapLoader mapLoader(engine);
-	mapLoader.load("data/level.json");
+	MapLoader mapLoader(assetSet, engine);
+	mapLoader.load("data/terrain.json");
 
 	// skybox
-	SkyBoxLoader skyLoader(engine.getRenderer(), ecs);
+	SkyBoxLoader skyLoader(assetSet, engine.getRenderer(), ecs);
 	skyBox = skyLoader.load("data/skybox/opengltutorial/top.jpg", "data/skybox/opengltutorial/bottom.jpg",
 							"data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
 							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
-
-	Entity camera = ecs.newEntity();
-	ecs.createComponent<InputComponent>(camera);
-	auto transformComp = ecs.createComponent<TransformComponent>(camera);
-	transformComp->setPosition(0, 2.0f, 5.0f);
-	auto camComp = ecs.createComponent<CameraComponent>(camera);
-	camComp->direction = {0, 0, -1.0f};
-	camComp->up = {0, 1.0f, 0};
-	ecs.createComponent<MovementComponent>(camera);
 }
 
-void SamplePart::update(Boiler::Time deltaTime)
+void SamplePart::update(const FrameInfo &frameInfo)
 {
-	/*
-	const float speed = 10;
-	EntityComponentSystem &ecs = engine.getEcs();
-	if (moveLeft)
-	{
-		glm::vec3 moveAmount = glm::cross(camDirection, camUp);
-		moveAmount *= deltaTime * speed;
-		camPosition -= moveAmount;
-	}
-	else if (moveRight)
-	{
-		glm::vec3 moveAmount = glm::cross(camDirection, camUp);
-		moveAmount *= deltaTime * speed;
-		camPosition += moveAmount;
-	}
-
-	if (moveCloser)
-	{
-		glm::vec3 moveAmount = camDirection;
-		moveAmount *= speed * deltaTime;
-		camPosition -= moveAmount;
-	}
-	else if (moveFurther)
-	{
-		glm::vec3 moveAmount = camDirection;
-		moveAmount *= speed * deltaTime;
-		camPosition += moveAmount;
-	}
-
-	if (moveUp)
-	{
-		camPosition.y += speed * deltaTime;
-	}
-	else if (moveDown)
-	{
-		camPosition.y -= speed * deltaTime;
-	}
-
-	glm::mat4 view = glm::lookAt(camPosition, camPosition + camDirection, glm::vec3(0.0f, 1.0f, 0.0f));
-	engine.getRenderer().setViewMatrix(view);
-	engine.getRenderer().setCameraPosition(camPosition);
-	*/
 }

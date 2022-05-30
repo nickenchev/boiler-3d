@@ -15,7 +15,7 @@ public:
 	SamplePart(Boiler::Engine &engine);
 
     void onStart() override;
-    void update(Boiler::Time deltaTime) override;
+    void update(const Boiler::FrameInfo &frameInfo) override;
 };
 
 #endif /* SAMPLEPART_H */
