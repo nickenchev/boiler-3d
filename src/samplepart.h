@@ -1,10 +1,7 @@
 #ifndef SAMPLEPART_H
 #define SAMPLEPART_H
 
-#include "boiler.h"
-#include "core/common.h"
 #include "core/part.h"
-#include "input/mousemotionevent.h"
 
 class SamplePart : public Boiler::Part
 {

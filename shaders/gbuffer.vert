@@ -38,4 +38,5 @@ void main()
 	fragColor = vertColor;
 	fragTexCoord = vertTexCoord;
 	fragNormal = mat3(transpose(inverse(modelMatrix))) * vertNormal; // TODO: Move the inversion to the CPU
+	//fragNormal = vertNormal;
 }

@@ -23,6 +23,9 @@
 #include "camera/cameracomponent.h"
 #include "physics/movementcomponent.h"
 #include "physics/collisioncomponent.h"
+#include "core/components/textcomponent.h"
+
+#include "core/glyphloader.h"
 
 using namespace Boiler;
 
@@ -39,8 +42,28 @@ void SamplePart::onStart()
 	light1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
+	/*
+	GlyphLoader glyphLoader;
+	GlyphMap glyphMap = glyphLoader.loadFace("data/fonts/PixelForce.ttf", 48);
+	AssetId atlasTexture = engine.getRenderer().loadTexture(glyphMap.getImageData(), TextureType::GLYPH_ATLAS);
+
+	std::unordered_map<unsigned long, AssetId> glyphPrimitives(glyphMap.getMap().size());
+
+	for (std::pair<unsigned long, Glyph> glyphPair : glyphMap.getMap())
+	{
+		//VertexData vertexData = glyphPair.second.vertexData();
+		//AssetId bufferId = engine.getRenderer().loadPrimitive(vertexData);
+		//Primitive primitive(bufferId, std::move(vertexData));
+		//AssetId primitiveId = assetSet.primitives.add(std::move(primitive));
+		//glyphPrimitives[glyphPair.first] = primitiveId;
+	}
+	Entity text1 = ecs.newEntity();
+	ecs.createComponent<TextComponent>(text1, "Hello World", vec4(1, 0, 0, 1), atlasTexture);
+	ecs.createComponent<TransformComponent>(text1, Rect(10, 10, Size(100, 50)));
+	*/
+
 	MapLoader mapLoader(assetSet, engine);
-	mapLoader.load("data/terrain.json");
+	mapLoader.load("data/sponza.json");
 
 	// skybox
 	SkyBoxLoader skyLoader(assetSet, engine.getRenderer(), ecs);
