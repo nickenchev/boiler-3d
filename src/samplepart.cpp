@@ -11,7 +11,6 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "samplepart.h"
-#include "input/inputevent.h"
 #include "core/entitycomponentsystem.h"
 #include "display/skyboxloader.h"
 #include "assets/maps/maploader.h"
@@ -42,25 +41,12 @@ void SamplePart::onStart()
 	light1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
-	/*
-	GlyphLoader glyphLoader;
-	GlyphMap glyphMap = glyphLoader.loadFace("data/fonts/PixelForce.ttf", 48);
-	AssetId atlasTexture = engine.getRenderer().loadTexture(glyphMap.getImageData(), TextureType::GLYPH_ATLAS);
+	GlyphLoader glyphLoader(engine.getRenderer(), assetSet);
+	AssetId glyphId = glyphLoader.loadFace("data/fonts/PixelForce.ttf", 48);
 
-	std::unordered_map<unsigned long, AssetId> glyphPrimitives(glyphMap.getMap().size());
-
-	for (std::pair<unsigned long, Glyph> glyphPair : glyphMap.getMap())
-	{
-		//VertexData vertexData = glyphPair.second.vertexData();
-		//AssetId bufferId = engine.getRenderer().loadPrimitive(vertexData);
-		//Primitive primitive(bufferId, std::move(vertexData));
-		//AssetId primitiveId = assetSet.primitives.add(std::move(primitive));
-		//glyphPrimitives[glyphPair.first] = primitiveId;
-	}
 	Entity text1 = ecs.newEntity();
-	ecs.createComponent<TextComponent>(text1, "Hello World", vec4(1, 0, 0, 1), atlasTexture);
+	ecs.createComponent<TextComponent>(text1, "Score: 0", vec4(1, 0, 0, 1), glyphId);
 	ecs.createComponent<TransformComponent>(text1, Rect(10, 10, Size(100, 50)));
-	*/
 
 	MapLoader mapLoader(assetSet, engine);
 	mapLoader.load("data/sponza.json");

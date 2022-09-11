@@ -35,10 +35,11 @@ void main()
 {
 	mat4 modelMatrix = matrices.data[constants.matrixId];
 	
-    gl_Position = vp.projection * vp.view * modelMatrix * vec4(vertPosition, 1.0f);
-	fragPosition = vec3(modelMatrix * vec4(vertPosition, 1.0));
+	vec3 offsetPosition = vertPosition + vec3(constants.offset);
+    gl_Position = vp.orphographic * modelMatrix * vec4(offsetPosition, 1.0f);
+
+	fragPosition = vec3(modelMatrix * vec4(offsetPosition, 1.0));
 	fragColor = vertColor;
 	fragTexCoord = vertTexCoord;
 	fragNormal = mat3(transpose(inverse(modelMatrix))) * vertNormal; // TODO: Move the inversion to the CPU
-	//fragNormal = vertNormal;
 }

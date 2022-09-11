@@ -5,3 +5,5 @@ glslc deferred.vert -o deferred.vert.spv
 glslc deferred.frag -o deferred.frag.spv
 glslc skybox.vert -o skybox.vert.spv
 glslc skybox.frag -o skybox.frag.spv
+glslc ui.vert -o ui.vert.spv
+glslc ui.frag -o ui.frag.spv

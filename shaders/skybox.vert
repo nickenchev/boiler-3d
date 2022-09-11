@@ -11,6 +11,7 @@ layout(set = 0, binding = 0) uniform ViewProjection
 {
 	mat4 view;
 	mat4 projection;
+	mat4 orphographic;
 } vp;
 
 layout(set = 0, binding = 1) uniform Matrices
@@ -20,6 +21,7 @@ layout(set = 0, binding = 1) uniform Matrices
 
 layout(push_constant) uniform Constants
 {
+	vec3 offset;
 	int matrixId;
 	int materialId;
 } constants;

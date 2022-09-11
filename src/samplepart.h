@@ -2,11 +2,14 @@
 #define SAMPLEPART_H
 
 #include "core/part.h"
+#include "core/entity.h"
+#include "display/glyphmap.h"
 
 class SamplePart : public Boiler::Part
 {
 	Boiler::Logger logger;
 	Boiler::Entity skyBox, light1;
+	Boiler::GlyphMap glyphMap;
 	
 public:
 	SamplePart(Boiler::Engine &engine);
