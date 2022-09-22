@@ -10,7 +10,6 @@
 #include <display/vulkanrenderer.h>
 
 #include "samplepart.h"
-#include "gui/imguivulkan.h"
 
 int main(int argc, char *argv[])
 {
@@ -53,7 +52,6 @@ int main(int argc, char *argv[])
 		{
 			throw std::runtime_error("Error Initializing SDL: " + std::string(SDL_GetError()));
 		}
-		SDL_SetRelativeMouseMode(SDL_TRUE);
 
 		// Vulkan extensions required by SDL
 		unsigned int extCount = 0;
@@ -70,7 +68,7 @@ int main(int argc, char *argv[])
 
 		// setup the engine itself
 		static Boiler::Engine engine(renderer.get());
-		engine.initialize(std::make_unique<Boiler::ImGuiVulkan>(*renderer), initialSize);
+		engine.initialize(initialSize);
 
 		// create the part and start it
 		auto part = std::make_shared<SamplePart>(engine);
