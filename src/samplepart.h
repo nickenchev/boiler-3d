@@ -8,7 +8,7 @@
 class SamplePart : public Boiler::Part
 {
 	Boiler::Logger logger;
-	Boiler::Entity skyBox, light1;
+	Boiler::Entity skyBox, light1, text1;
 	Boiler::GlyphMap glyphMap;
 	
 public:
