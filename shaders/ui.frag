@@ -1,6 +1,6 @@
 #version 450
 
-#define MAX_MATERIALS 256
+#define MAX_MATERIALS 1024
 
 layout(location = 0) in vec3 fragPosition;
 layout(location = 1) in vec4 fragColor;
@@ -32,11 +32,6 @@ void main()
 {
 	Material material = materials.data[constants.materialId];
 	vec4 tex = texture(baseTexSampler, fragTexCoord);
-
-	if (tex.r + tex.g + tex.b == 0) discard;
-	else
-	{
-		outColor = material.baseColorFactor;
-	}
+	outColor = tex * material.baseColorFactor * fragColor;
 }
 

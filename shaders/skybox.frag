@@ -1,6 +1,6 @@
 #version 450
 
-#define MAX_MATERIALS 256
+#define MAX_MATERIALS 1024
 
 layout(location = 0) in vec3 fragPosition;
 layout(location = 2) in vec3 fragTexCoord;

@@ -1,6 +1,6 @@
 #version 450
 
-#define MAX_MATERIALS 256
+#define MAX_MATERIALS 1024
 
 layout(constant_id = 0) const bool USE_TEXTURE = false;
 
@@ -36,18 +36,13 @@ void main()
 {
 	Material material = materials.data[constants.materialId];
 	
-	outPosition = vec4(fragPosition, 1);
+	outAlbedo = fragColor * material.baseColorFactor;
 	if (USE_TEXTURE)
 	{
-		outAlbedo = texture(baseTexSampler, fragTexCoord) * material.baseColorFactor;
-	}
-	else
-	{
-		outAlbedo = fragColor * material.baseColorFactor;
+		outAlbedo *= texture(baseTexSampler, fragTexCoord);
 	}
 
-	if (outAlbedo.a < 0.7)
-		discard;
+	outPosition = vec4(fragPosition, 1);
 	outNormal = vec4(fragNormal, 1);
 }
 
