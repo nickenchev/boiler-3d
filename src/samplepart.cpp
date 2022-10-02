@@ -43,24 +43,24 @@ void SamplePart::onStart()
 	light1 = ecs.newEntity();
 	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
-	// GlyphLoader glyphLoader(engine.getRenderer(), engine.getRenderer().getAssetSet());
-	// AssetId glyphId = glyphLoader.loadFace("data/fonts/Retroville NC.ttf", 32);
-
-	// text1 = ecs.newEntity();
-	// ecs.createComponent<TextComponent>(text1, "", glyphId);
-	// ecs.createComponent<TransformComponent>(text1, Rect(10, 35, Size(100, 50)));
+	MapLoader mapLoader(engine.getRenderer().getAssetSet(), engine);
+	mapLoader.load("data/level.json");
 
 	/*
-	MapLoader mapLoader(engine.getRenderer().getAssetSet(), engine);
-	mapLoader.load("data/city.json");
+	GlyphLoader glyphLoader(engine.getRenderer(), engine.getRenderer().getAssetSet());
+	AssetId glyphId = glyphLoader.loadFace("data/fonts/Retroville NC.ttf", 32);
+
+	text1 = ecs.newEntity();
+	ecs.createComponent<TextComponent>(text1, "", glyphId);
+	ecs.createComponent<TransformComponent>(text1, Rect(10, 35, Size(100, 50)));
 
 	// skybox
 	SkyBoxLoader skyLoader(engine.getRenderer().getAssetSet(), engine.getRenderer(), ecs);
 	skyBox = skyLoader.load("data/skybox/opengltutorial/top.jpg", "data/skybox/opengltutorial/bottom.jpg",
 							"data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
 							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
-	*/
 
+	*/
 	Entity gui = ecs.newEntity();
 	ecs.createComponent<GUIComponent>(gui, [] {
 	});
@@ -69,5 +69,5 @@ void SamplePart::onStart()
 void SamplePart::update(const FrameInfo &frameInfo)
 {
 	// TextComponent &textComp = engine.getEcs().getComponentStore().retrieve<TextComponent>(text1);
-	// textComp.text = fmt::format("{}", frameInfo.globalTime);
+	// textComp.text = fmt::format("{}, {} fps", frameInfo.globalTime, frameInfo.frameCount / frameInfo.globalTime);
 }

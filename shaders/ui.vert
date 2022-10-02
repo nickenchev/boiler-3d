@@ -7,12 +7,13 @@ layout(location = 1) in vec4 vertColor;
 layout(location = 2) in vec2 vertTexCoord;
 layout(location = 3) in vec3 vertNormal;
 
-layout(set = 0, binding = 0) uniform ViewProjection
+layout(set = 0, binding = 0) uniform RenderMatrices
 {
 	mat4 view;
 	mat4 projection;
+	mat4 viewProjection;
 	mat4 orphographic;
-} vp;
+} rm;
 
 layout(set = 0, binding = 1) uniform Matrices
 {
@@ -36,7 +37,7 @@ void main()
 	mat4 modelMatrix = matrices.data[constants.matrixId];
 	
 	vec3 offsetPosition = vertPosition + vec3(constants.offset);
-    gl_Position = vp.orphographic * modelMatrix * vec4(offsetPosition, 1.0f);
+    gl_Position = rm.orphographic * modelMatrix * vec4(offsetPosition, 1.0f);
 
 	fragPosition = vec3(modelMatrix * vec4(offsetPosition, 1.0));
 	fragColor = vertColor;

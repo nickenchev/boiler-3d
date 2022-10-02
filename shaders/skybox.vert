@@ -7,12 +7,13 @@ layout(location = 1) in vec4 vertColor;
 layout(location = 2) in vec3 vertTexCoord;
 layout(location = 3) in vec3 vertNormal;
 
-layout(set = 0, binding = 0) uniform ViewProjection
+layout(set = 0, binding = 0) uniform RenderMatrices
 {
 	mat4 view;
 	mat4 projection;
+	mat4 viewProjection;
 	mat4 orphographic;
-} vp;
+} rm;
 
 layout(set = 0, binding = 1) uniform Matrices
 {
@@ -31,10 +32,10 @@ layout(location = 2) out vec3 fragTexCoord;
 
 void main()
 {
-	mat4 view = mat4(mat3(vp.view)); // TODO: Move this to CPU
+	mat4 view = mat4(mat3(rm.view)); // TODO: Move this to CPU
 
 	fragPosition = vertPosition;
 	fragTexCoord = vertPosition;
-	vec4 pos = vp.projection * view * vec4(vertPosition, 1.0f);
+	vec4 pos = rm.projection * view * vec4(vertPosition, 1.0f);
     gl_Position = pos.xyww;
 }
