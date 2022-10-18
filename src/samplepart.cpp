@@ -19,9 +19,6 @@
 #include "core/components/rendercomponent.h"
 #include "core/components/lightingcomponent.h"
 #include "core/components/transformcomponent.h"
-#include "input/inputcomponent.h"
-#include "camera/cameracomponent.h"
-#include "physics/movementcomponent.h"
 #include "physics/collisioncomponent.h"
 #include "core/components/textcomponent.h"
 #include "core/components/guicomponent.h"
@@ -40,7 +37,7 @@ void SamplePart::onStart()
 
 	EntityComponentSystem &ecs = engine.getEcs();
 	LightSource lightSource1({-30, 20, 0}, {0.8, 0.8, 0.8});
-	light1 = ecs.newEntity();
+	light1 = ecs.newEntity("light 1");
 	auto lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
 	MapLoader mapLoader(engine.getRenderer().getAssetSet(), engine);
@@ -53,6 +50,7 @@ void SamplePart::onStart()
 	text1 = ecs.newEntity();
 	ecs.createComponent<TextComponent>(text1, "", glyphId);
 	ecs.createComponent<TransformComponent>(text1, Rect(10, 35, Size(100, 50)));
+	*/
 
 	// skybox
 	SkyBoxLoader skyLoader(engine.getRenderer().getAssetSet(), engine.getRenderer(), ecs);
@@ -60,8 +58,7 @@ void SamplePart::onStart()
 							"data/skybox/opengltutorial/left.jpg", "data/skybox/opengltutorial/right.jpg",
 							"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
-	*/
-	Entity gui = ecs.newEntity();
+	Entity gui = ecs.newEntity("gui");
 	ecs.createComponent<GUIComponent>(gui, [] {
 	});
 }
