@@ -3,7 +3,7 @@
 #include <sstream>
 #include <unordered_map>
 
-#include <SDL2/SDL_keycode.h>
+#include <SDL_keycode.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
