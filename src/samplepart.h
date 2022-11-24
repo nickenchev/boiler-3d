@@ -5,6 +5,11 @@
 #include "core/entity.h"
 #include "display/glyphmap.h"
 
+namespace Boiler
+{
+	class EntityComponentSystem;
+}
+
 class SamplePart : public Boiler::Part
 {
 	Boiler::Logger logger;

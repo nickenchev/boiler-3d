@@ -12,6 +12,7 @@ add_subdirectory(boiler/ libboiler)
 
 add_executable(boiler3d
   src/main.cpp
+  src/paddlemovementsystem.cpp
   src/samplepart.cpp)
 
 target_include_directories(boiler3d PRIVATE boiler)

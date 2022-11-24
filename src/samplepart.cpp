@@ -10,7 +10,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-#include "samplepart.h"
 #include "core/entitycomponentsystem.h"
 #include "display/skyboxloader.h"
 #include "display/renderer.h"
@@ -27,13 +26,16 @@
 #include "core/components/textcomponent.h"
 #include "core/components/guicomponent.h"
 #include "assets/gltfimporter.h"
-
 #include "core/glyphloader.h"
+
+#include "samplepart.h"
+#include "paddlemovementsystem.h"
 
 using namespace Boiler;
 
 SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample Part")
 {
+	engine.getEcs().getComponentSystems().registerSystem<PaddleMovementSystem>(SystemStage::USER_SIMULATION);
 }
 
 void SamplePart::onStart()
@@ -53,11 +55,11 @@ void SamplePart::onStart()
 	ecs.createComponent<MovementComponent>(camera);
 
 	GLTFImporter importStage(engine.getRenderer().getAssetSet(), engine, "data/breakout/stage1/stage1.gltf");
-	Entity stage1 = ecs.newEntity("Stage");
-	importStage.createInstance(stage1);
-	TransformComponent &stage1Transform = ecs.createComponent<TransformComponent>(stage1);
-	stage1Transform.setScale(10, 10, 10);
-	stage1Transform.setPosition(0, -25, 0);
+	Entity stage = ecs.newEntity("Stage");
+	importStage.createInstance(stage);
+	TransformComponent &stageTransform = ecs.createComponent<TransformComponent>(stage);
+	stageTransform.setScale(3.0f, 3.0f, 3.0f);
+	stageTransform.setPosition(0, -20, 20);
 
 	GLTFImporter importBrick1(engine.getRenderer().getAssetSet(), engine, "data/breakout/brick/brick1.gltf");
 	cgfloat y = 15;
@@ -72,6 +74,8 @@ void SamplePart::onStart()
 			brickTransform.setPosition(x, y, 0);
 			x += 4.5f;
 			ecs.createComponent<PhysicsComponent>(brick1);
+			CollisionComponent &brickCollision = ecs.getComponentStore().retrieve<CollisionComponent>(brick1);
+			brickCollision.normal = vec3(0, -1, 0);
 		}
 		y -= 2.5f;
 	}
@@ -83,7 +87,12 @@ void SamplePart::onStart()
 	paddleTransform.setPosition(0, -18, 0);
 	InputComponent &inputComponent = ecs.createComponent<InputComponent>(paddle);
 	MovementComponent &movementComponent = ecs.createComponent<MovementComponent>(paddle);
-	ecs.createComponent<PhysicsComponent>(paddle);
+	PhysicsComponent &paddlePhysics = ecs.createComponent<PhysicsComponent>(paddle);
+	paddlePhysics.speed = 10.0f;
+	paddlePhysics.acceleration = 1.0f;
+	CollisionComponent &paddleCollision = ecs.getComponentStore().retrieve<CollisionComponent>(paddle);
+	paddleCollision.normal = vec3(0, 1, 0);
+	paddleCollision.isDynamic = true;
 
 	GLTFImporter importBall(engine.getRenderer().getAssetSet(), engine, "data/breakout/ball.gltf");
 	Entity ball = ecs.newEntity("Ball");
@@ -92,23 +101,22 @@ void SamplePart::onStart()
 	ballTransform.setPosition(0, -15, 0);
 	ballTransform.setScale(0.6f, 0.6f, 0.6f);
 	PhysicsComponent &physicsComponent = ecs.createComponent<PhysicsComponent>(ball);
-	physicsComponent.velocity = vec3(0, 0.1f, 0);
+	physicsComponent.velocity = vec3(-3.0f, 10.0f, 0);
 	CollisionComponent &collisionComponent = ecs.getComponentStore().retrieve<CollisionComponent>(ball);
 	collisionComponent.isDynamic = true;
 	collisionComponent.damping = 1;
-	collisionComponent.colliderType = ColliderType::Sphere;
+	//collisionComponent.colliderType = ColliderType::Sphere;
 
-	LightSource lightSource1({0, 10, 10}, {0.8, 0.8, 0.8});
+	LightSource lightSource1({0, 0, 20}, {0.8, 0.8, 0.8});
 	light1 = ecs.newEntity("Light 1");
 	auto &lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 	ecs.createComponent<ParentComponent>(light1, ball);
 
-
 	GlyphLoader glyphLoader(engine.getRenderer(), engine.getRenderer().getAssetSet());
 	AssetId glyphId = glyphLoader.loadFace("data/fonts/Retroville NC.ttf", 32);
 
-	// text1 = ecs.newEntity("Score Text");
-	// ecs.createComponent<TextComponent>(text1, "Score: 0", glyphId);
+	// text1 = ecs.newEntity("FPS counter");
+	// ecs.createComponent<TextComponent>(text1, "", glyphId);
 	// ecs.createComponent<TransformComponent>(text1, Rect(10, 35, Size(100, 50)));
 
 	// skybox
