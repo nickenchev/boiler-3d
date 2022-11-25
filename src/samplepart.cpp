@@ -59,7 +59,7 @@ void SamplePart::onStart()
 	importStage.createInstance(stage);
 	TransformComponent &stageTransform = ecs.createComponent<TransformComponent>(stage);
 	stageTransform.setScale(3.0f, 3.0f, 3.0f);
-	stageTransform.setPosition(0, -20, 20);
+	stageTransform.setPosition(0, -40, 20);
 
 	GLTFImporter importBrick1(engine.getRenderer().getAssetSet(), engine, "data/breakout/brick/brick1.gltf");
 	cgfloat y = 15;
@@ -68,7 +68,7 @@ void SamplePart::onStart()
 		cgfloat x = -18;
 		for (int c = 0; c < 9; ++c)
 		{
-			Entity brick1 = ecs.newEntity("Brick 1");
+			Entity brick1 = ecs.newEntity("Brick");
 			importBrick1.createInstance(brick1);
 			TransformComponent &brickTransform = ecs.getComponentStore().retrieve<TransformComponent>(brick1);
 			brickTransform.setPosition(x, y, 0);
@@ -95,22 +95,21 @@ void SamplePart::onStart()
 	paddleCollision.isDynamic = true;
 
 	GLTFImporter importBall(engine.getRenderer().getAssetSet(), engine, "data/breakout/ball.gltf");
-	Entity ball = ecs.newEntity("Ball");
+	ball = ecs.newEntity("Ball");
 	importBall.createInstance(ball);
 	TransformComponent &ballTransform = ecs.getComponentStore().retrieve<TransformComponent>(ball);
 	ballTransform.setPosition(0, -15, 0);
-	ballTransform.setScale(0.6f, 0.6f, 0.6f);
+	ballTransform.setScale(0.5f, 0.5f, 0.5f);
 	PhysicsComponent &physicsComponent = ecs.createComponent<PhysicsComponent>(ball);
-	physicsComponent.velocity = vec3(-3.0f, 10.0f, 0);
+	physicsComponent.velocity = glm::normalize(vec3(-0.5f, 1.0f, 0)) * 15.0f;
 	CollisionComponent &collisionComponent = ecs.getComponentStore().retrieve<CollisionComponent>(ball);
 	collisionComponent.isDynamic = true;
 	collisionComponent.damping = 1;
-	//collisionComponent.colliderType = ColliderType::Sphere;
+	collisionComponent.colliderType = ColliderType::Sphere;
 
 	LightSource lightSource1({0, 0, 20}, {0.8, 0.8, 0.8});
 	light1 = ecs.newEntity("Light 1");
 	auto &lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
-	ecs.createComponent<ParentComponent>(light1, ball);
 
 	GlyphLoader glyphLoader(engine.getRenderer(), engine.getRenderer().getAssetSet());
 	AssetId glyphId = glyphLoader.loadFace("data/fonts/Retroville NC.ttf", 32);
@@ -132,6 +131,12 @@ void SamplePart::onStart()
 
 void SamplePart::update(const FrameInfo &frameInfo)
 {
+	TransformComponent &ballTransform = engine.getEcs().getComponentStore().retrieve<TransformComponent>(ball);
+	LightingComponent &lightComp = engine.getEcs().getComponentStore().retrieve<LightingComponent>(light1);
+
+	vec3 newLightPos = ballTransform.getPosition() + vec3(0, -5, 10);
+	lightComp.source.position = vec4(newLightPos, 0);
+	
 	// TextComponent &textComp = engine.getEcs().getComponentStore().retrieve<TextComponent>(text1);
 	// textComp.text = fmt::format("{}, {} fps", frameInfo.globalTime, frameInfo.frameCount / frameInfo.globalTime);
 }

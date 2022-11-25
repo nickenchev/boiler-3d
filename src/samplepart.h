@@ -13,7 +13,7 @@ namespace Boiler
 class SamplePart : public Boiler::Part
 {
 	Boiler::Logger logger;
-	Boiler::Entity skyBox, light1, text1;
+	Boiler::Entity skyBox, light1, text1, ball;
 	Boiler::GlyphMap glyphMap;
 	
 public:
