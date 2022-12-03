@@ -58,21 +58,22 @@ void SamplePart::onStart()
 	Entity stage = ecs.newEntity("Stage");
 	importStage.createInstance(stage);
 	TransformComponent &stageTransform = ecs.createComponent<TransformComponent>(stage);
-	stageTransform.setScale(3.0f, 3.0f, 3.0f);
+	stageTransform.setScale(2.2f, 3.0f, 3.0f);
 	stageTransform.setPosition(0, -40, 20);
 
 	GLTFImporter importBrick1(engine.getRenderer().getAssetSet(), engine, "data/breakout/brick/brick1.gltf");
 	cgfloat y = 15;
 	for (int r = 0; r < 6; ++r)
 	{
-		cgfloat x = -18;
-		for (int c = 0; c < 9; ++c)
+		cgfloat x = -19;
+		for (int c = 0; c < 13; ++c)
 		{
 			Entity brick1 = ecs.newEntity("Brick");
 			importBrick1.createInstance(brick1);
 			TransformComponent &brickTransform = ecs.getComponentStore().retrieve<TransformComponent>(brick1);
+			brickTransform.setScale(brickTransform.getScale() * vec3(0.7f, 1, 1));
 			brickTransform.setPosition(x, y, 0);
-			x += 4.5f;
+			x += 3.2f;
 			ecs.createComponent<PhysicsComponent>(brick1);
 			CollisionComponent &brickCollision = ecs.getComponentStore().retrieve<CollisionComponent>(brick1);
 			brickCollision.normal = vec3(0, -1, 0);
@@ -88,7 +89,7 @@ void SamplePart::onStart()
 	InputComponent &inputComponent = ecs.createComponent<InputComponent>(paddle);
 	MovementComponent &movementComponent = ecs.createComponent<MovementComponent>(paddle);
 	PhysicsComponent &paddlePhysics = ecs.createComponent<PhysicsComponent>(paddle);
-	paddlePhysics.speed = 10.0f;
+	paddlePhysics.speed = 15.0f;
 	paddlePhysics.acceleration = 1.0f;
 	CollisionComponent &paddleCollision = ecs.getComponentStore().retrieve<CollisionComponent>(paddle);
 	paddleCollision.normal = vec3(0, 1, 0);
@@ -101,7 +102,7 @@ void SamplePart::onStart()
 	ballTransform.setPosition(0, -15, 0);
 	ballTransform.setScale(0.5f, 0.5f, 0.5f);
 	PhysicsComponent &physicsComponent = ecs.createComponent<PhysicsComponent>(ball);
-	physicsComponent.velocity = glm::normalize(vec3(-0.5f, 1.0f, 0)) * 15.0f;
+	physicsComponent.velocity = glm::normalize(vec3(-0.5f, 1.0f, 0)) * 25.0f;
 	CollisionComponent &collisionComponent = ecs.getComponentStore().retrieve<CollisionComponent>(ball);
 	collisionComponent.isDynamic = true;
 	collisionComponent.damping = 1;
