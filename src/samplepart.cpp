@@ -89,8 +89,9 @@ void SamplePart::onStart()
 	InputComponent &inputComponent = ecs.createComponent<InputComponent>(paddle);
 	MovementComponent &movementComponent = ecs.createComponent<MovementComponent>(paddle);
 	PhysicsComponent &paddlePhysics = ecs.createComponent<PhysicsComponent>(paddle);
-	paddlePhysics.speed = 15.0f;
+	paddlePhysics.speed = 20.0f;
 	paddlePhysics.acceleration = 1.0f;
+	paddlePhysics.mass = 999;
 	CollisionComponent &paddleCollision = ecs.getComponentStore().retrieve<CollisionComponent>(paddle);
 	paddleCollision.normal = vec3(0, 1, 0);
 	paddleCollision.isDynamic = true;
