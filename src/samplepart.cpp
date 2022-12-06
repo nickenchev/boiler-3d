@@ -113,8 +113,8 @@ void SamplePart::onStart()
 	light1 = ecs.newEntity("Light 1");
 	auto &lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
 
-	GlyphLoader glyphLoader(engine.getRenderer(), engine.getRenderer().getAssetSet());
-	AssetId glyphId = glyphLoader.loadFace("data/fonts/Retroville NC.ttf", 32);
+	// GlyphLoader glyphLoader(engine.getRenderer(), engine.getRenderer().getAssetSet());
+	// AssetId glyphId = glyphLoader.loadFace("data/fonts/Retroville NC.ttf", 32);
 
 	// text1 = ecs.newEntity("FPS counter");
 	// ecs.createComponent<TextComponent>(text1, "", glyphId);

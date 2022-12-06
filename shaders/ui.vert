@@ -1,6 +1,6 @@
 #version 450
 
-#define MAX_OBJECTS 5000
+#define MAX_OBJECTS 1000
 
 layout(location = 0) in vec3 vertPosition;
 layout(location = 1) in vec4 vertColor;
