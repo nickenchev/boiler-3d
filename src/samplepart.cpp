@@ -101,7 +101,7 @@ void SamplePart::onStart()
 	importBall.createInstance(ball);
 	TransformComponent &ballTransform = ecs.getComponentStore().retrieve<TransformComponent>(ball);
 	ballTransform.setPosition(0, -15, 0);
-	ballTransform.setScale(0.5f, 0.5f, 0.5f);
+	ballTransform.setScale(0.4f, 0.4f, 0.4f);
 	PhysicsComponent &physicsComponent = ecs.createComponent<PhysicsComponent>(ball);
 	physicsComponent.velocity = glm::normalize(vec3(-0.5f, 1.0f, 0)) * 25.0f;
 	CollisionComponent &collisionComponent = ecs.getComponentStore().retrieve<CollisionComponent>(ball);
