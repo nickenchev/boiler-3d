@@ -31,11 +31,15 @@
 #include "samplepart.h"
 #include "paddlemovementsystem.h"
 
+#include "imgui/imgui.h"
+
 using namespace Boiler;
 
 SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample Part")
 {
 	engine.getEcs().getComponentSystems().registerSystem<PaddleMovementSystem>(SystemStage::USER_SIMULATION);
+	score = 0;
+	balls = 2;
 }
 
 void SamplePart::onStart()
@@ -127,12 +131,22 @@ void SamplePart::onStart()
 	// 						"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
 	Entity gui = ecs.newEntity("gui");
-	ecs.createComponent<GUIComponent>(gui, [] {
+	ecs.createComponent<GUIComponent>(gui, [this] {
+		ImGui::Begin("Demo");
+		ImGui::Text(fmt::format("Score: {}", score).c_str());
+		ImGui::Text("Balls: 3");
+		if (ImGui::Button("Reset Game"))
+		{
+			score = 0;
+			balls = 2;
+		}
+		ImGui::End();
 	});
 }
 
 void SamplePart::update(const FrameInfo &frameInfo)
 {
+	score += 10;
 	TransformComponent &ballTransform = engine.getEcs().getComponentStore().retrieve<TransformComponent>(ball);
 	LightingComponent &lightComp = engine.getEcs().getComponentStore().retrieve<LightingComponent>(light1);
 
