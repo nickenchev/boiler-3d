@@ -37,6 +37,8 @@
 #include "healthcomponent.h"
 #include "damagedealercomponent.h"
 #include "damagedealersystem.h"
+#include "multiplelifesystem.h"
+#include "extralivescomponent.h"
 
 using namespace Boiler;
 
@@ -53,6 +55,7 @@ void SamplePart::onStart()
 	engine.getEcs().getComponentSystems().registerSystem<DamageDealerSystem>(SystemStage::USER_SIMULATION);
 	engine.getEcs().getComponentSystems().registerSystem<DamageSystem>(SystemStage::USER_SIMULATION);
 	ScoringSystem &scoringSystem = engine.getEcs().getComponentSystems().registerSystem<ScoringSystem>(SystemStage::USER_SIMULATION);
+	engine.getEcs().getComponentSystems().registerSystem<MultipleLifeSystem>(SystemStage::USER_SIMULATION);
 
 	EntityComponentSystem &ecs = engine.getEcs();
 
@@ -123,6 +126,7 @@ void SamplePart::onStart()
 	colliderComponent.colliderType = ColliderType::Sphere;
 	ecs.createComponent<DamageDealerComponent>(ball, 10);
 	ecs.createComponent<HealthComponent>(ball, 100);
+	ecs.createComponent<ExtraLivesComponent>(ball, 2);
 
 	LightSource lightSource1({0, 0, 20}, {0.8, 0.8, 0.8});
 	light1 = ecs.newEntity("Light 1");
@@ -152,11 +156,12 @@ void SamplePart::onStart()
 	// 						"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
 	Entity gui = ecs.newEntity("gui");
-	ecs.createComponent<GUIComponent>(gui, [this, &scoringSystem] {
+	ecs.createComponent<GUIComponent>(gui, [this, &ecs, &scoringSystem] {
+		ExtraLivesComponent &extraLives = ecs.retrieve<ExtraLivesComponent>(ball);
 		ImGui::Begin("Balls");
 		{
 			ImGui::Text("%s", fmt::format("Score: {}", scoringSystem.getScore()).c_str());
-			ImGui::Text("%s", fmt::format("Paddles: {}", paddles).c_str());
+			ImGui::Text("%s", fmt::format("Paddles: {}", extraLives.count).c_str());
 			if (ImGui::Button("Reset Game"))
 			{
 				scoringSystem.resetScore();

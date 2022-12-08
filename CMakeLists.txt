@@ -23,6 +23,9 @@ add_executable(boiler3d
   src/scoringsystem.cpp
   src/damagedealercomponent.h
   src/damagecomponent.h
+  src/extralivescomponent.h
+  src/multiplelifesystem.h
+  src/multiplelifesystem.cpp
   src/samplepart.h
   src/samplepart.cpp)
 
