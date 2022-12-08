@@ -15,7 +15,7 @@ class SamplePart : public Boiler::Part
 	Boiler::Logger logger;
 	Boiler::Entity skyBox, light1, text1, ball;
 	Boiler::GlyphMap glyphMap;
-	unsigned int score, balls;
+	unsigned int balls;
 	
 public:
 	SamplePart(Boiler::Engine &engine);

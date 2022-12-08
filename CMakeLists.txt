@@ -12,7 +12,14 @@ add_subdirectory(boiler/ libboiler)
 
 add_executable(boiler3d
   src/main.cpp
+  src/paddlemovementsystem.h
   src/paddlemovementsystem.cpp
+  src/damagesystem.h
+  src/damagesystem.cpp
+  src/scorecomponent.h
+  src/scoringsystem.h
+  src/scoringsystem.cpp
+  src/samplepart.h
   src/samplepart.cpp)
 
 target_include_directories(boiler3d PRIVATE boiler)

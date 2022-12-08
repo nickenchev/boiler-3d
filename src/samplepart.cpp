@@ -21,24 +21,25 @@
 #include "core/components/rendercomponent.h"
 #include "core/components/lightingcomponent.h"
 #include "core/components/transformcomponent.h"
-#include "physics/collisioncomponent.h"
+#include "physics/collidercomponent.h"
 #include "physics/physicscomponent.h"
 #include "core/components/textcomponent.h"
 #include "core/components/guicomponent.h"
 #include "assets/gltfimporter.h"
 #include "core/glyphloader.h"
+#include "imgui/imgui.h"
 
 #include "samplepart.h"
 #include "paddlemovementsystem.h"
-
-#include "imgui/imgui.h"
+#include "damagesystem.h"
+#include "scoringsystem.h"
+#include "scorecomponent.h"
+#include "healthcomponent.h"
 
 using namespace Boiler;
 
 SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample Part")
 {
-	engine.getEcs().getComponentSystems().registerSystem<PaddleMovementSystem>(SystemStage::USER_SIMULATION);
-	score = 0;
 	balls = 2;
 }
 
@@ -46,13 +47,15 @@ void SamplePart::onStart()
 {
 	engine.getRenderer().setClearColor({0, 0, 0});
 
-	//MapLoader mapLoader(engine.getRenderer().getAssetSet(), engine);
-	//mapLoader.load("data/level.json");
+	engine.getEcs().getComponentSystems().registerSystem<PaddleMovementSystem>(SystemStage::USER_SIMULATION);
+	engine.getEcs().getComponentSystems().registerSystem<DamageSystem>(SystemStage::USER_SIMULATION);
+	ScoringSystem &scoringSystem = engine.getEcs().getComponentSystems().registerSystem<ScoringSystem>(SystemStage::USER_SIMULATION);
+
 	EntityComponentSystem &ecs = engine.getEcs();
 
 	Entity camera = ecs.newEntity("Camera");
 	TransformComponent &transformComponent = ecs.createComponent<TransformComponent>(camera);
-	transformComponent.setPosition(0, 0, 50);
+	transformComponent.setPosition(0, 0, 60);
 	CameraComponent &cameraComponent = ecs.createComponent<CameraComponent>(camera);
 	cameraComponent.up = vec3(0, 1, 0);
 	cameraComponent.direction = vec3(0, 0, -1);
@@ -72,15 +75,18 @@ void SamplePart::onStart()
 		cgfloat x = -19;
 		for (int c = 0; c < 13; ++c)
 		{
-			Entity brick1 = ecs.newEntity("Brick");
-			importBrick1.createInstance(brick1);
-			TransformComponent &brickTransform = ecs.getComponentStore().retrieve<TransformComponent>(brick1);
+			Entity brick = ecs.newEntity("Brick");
+			importBrick1.createInstance(brick);
+			TransformComponent &brickTransform = ecs.getComponentStore().retrieve<TransformComponent>(brick);
 			brickTransform.setScale(brickTransform.getScale() * vec3(0.7f, 1, 1));
 			brickTransform.setPosition(x, y, 0);
 			x += 3.2f;
-			ecs.createComponent<PhysicsComponent>(brick1);
-			CollisionComponent &brickCollision = ecs.getComponentStore().retrieve<CollisionComponent>(brick1);
-			brickCollision.normal = vec3(0, -1, 0);
+			ecs.createComponent<PhysicsComponent>(brick);
+			ColliderComponent &brickCollider = ecs.getComponentStore().retrieve<ColliderComponent>(brick);
+			brickCollider.normal = vec3(0, -1, 0);
+			HealthComponent &health = ecs.createComponent<HealthComponent>(brick, 10);
+			ecs.createComponent<ScoreComponent>(brick, 15);
+
 		}
 		y -= 2.5f;
 	}
@@ -89,16 +95,16 @@ void SamplePart::onStart()
 	Entity paddle = ecs.newEntity("Paddle");
 	importPaddle.createInstance(paddle);
 	TransformComponent &paddleTransform = ecs.getComponentStore().retrieve<TransformComponent>(paddle);
-	paddleTransform.setPosition(0, -18, 0);
+	paddleTransform.setPosition(0, -22, 0);
 	InputComponent &inputComponent = ecs.createComponent<InputComponent>(paddle);
 	MovementComponent &movementComponent = ecs.createComponent<MovementComponent>(paddle);
 	PhysicsComponent &paddlePhysics = ecs.createComponent<PhysicsComponent>(paddle);
 	paddlePhysics.speed = 20.0f;
 	paddlePhysics.acceleration = 1.0f;
 	paddlePhysics.mass = 999;
-	CollisionComponent &paddleCollision = ecs.getComponentStore().retrieve<CollisionComponent>(paddle);
-	paddleCollision.normal = vec3(0, 1, 0);
-	paddleCollision.isDynamic = true;
+	ColliderComponent &paddleCollider = ecs.getComponentStore().retrieve<ColliderComponent>(paddle);
+	paddleCollider.normal = vec3(0, 1, 0);
+	paddleCollider.isDynamic = true;
 
 	GLTFImporter importBall(engine.getRenderer().getAssetSet(), engine, "data/breakout/ball.gltf");
 	ball = ecs.newEntity("Ball");
@@ -108,14 +114,23 @@ void SamplePart::onStart()
 	ballTransform.setScale(0.4f, 0.4f, 0.4f);
 	PhysicsComponent &physicsComponent = ecs.createComponent<PhysicsComponent>(ball);
 	physicsComponent.velocity = glm::normalize(vec3(-0.5f, 1.0f, 0)) * 25.0f;
-	CollisionComponent &collisionComponent = ecs.getComponentStore().retrieve<CollisionComponent>(ball);
-	collisionComponent.isDynamic = true;
-	collisionComponent.damping = 1;
-	collisionComponent.colliderType = ColliderType::Sphere;
+	ColliderComponent &colliderComponent = ecs.getComponentStore().retrieve<ColliderComponent>(ball);
+	colliderComponent.isDynamic = true;
+	colliderComponent.damping = 1;
+	colliderComponent.colliderType = ColliderType::Sphere;
 
 	LightSource lightSource1({0, 0, 20}, {0.8, 0.8, 0.8});
 	light1 = ecs.newEntity("Light 1");
 	auto &lightComp = ecs.createComponent<LightingComponent>(light1, lightSource1);
+
+	Entity zone = ecs.newEntity("Dead Zone");
+	ColliderComponent &zoneCollider = ecs.createComponent<ColliderComponent>(zone);
+	zoneCollider.colliderType = ColliderType::AABB;
+	zoneCollider.min = vec3(-25, 0, -5);
+	zoneCollider.max = vec3(25, 5, 5);
+	TransformComponent &zoneTransform = ecs.createComponent<TransformComponent>(zone);
+	zoneTransform.setPosition(vec3(0, -33, 0));
+	PhysicsComponent &zonePhysics = ecs.createComponent<PhysicsComponent>(zone);
 
 	// GlyphLoader glyphLoader(engine.getRenderer(), engine.getRenderer().getAssetSet());
 	// AssetId glyphId = glyphLoader.loadFace("data/fonts/Retroville NC.ttf", 32);
@@ -131,13 +146,13 @@ void SamplePart::onStart()
 	// 						"data/skybox/opengltutorial/front.jpg", "data/skybox/opengltutorial/back.jpg");
 
 	Entity gui = ecs.newEntity("gui");
-	ecs.createComponent<GUIComponent>(gui, [this] {
-		ImGui::Begin("Demo");
-		ImGui::Text(fmt::format("Score: {}", score).c_str());
-		ImGui::Text("Balls: 3");
+	ecs.createComponent<GUIComponent>(gui, [this, &scoringSystem] {
+		ImGui::Begin("Breakout Clone");
+		ImGui::Text("%s", fmt::format("Score: {}", scoringSystem.getScore()).c_str());
+		ImGui::Text("%s", fmt::format("Balls: {}", balls).c_str());
 		if (ImGui::Button("Reset Game"))
 		{
-			score = 0;
+			scoringSystem.resetScore();
 			balls = 2;
 		}
 		ImGui::End();
@@ -146,7 +161,6 @@ void SamplePart::onStart()
 
 void SamplePart::update(const FrameInfo &frameInfo)
 {
-	score += 10;
 	TransformComponent &ballTransform = engine.getEcs().getComponentStore().retrieve<TransformComponent>(ball);
 	LightingComponent &lightComp = engine.getEcs().getComponentStore().retrieve<LightingComponent>(light1);
 
