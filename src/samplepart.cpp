@@ -42,7 +42,7 @@ using namespace Boiler;
 
 SamplePart::SamplePart(Engine &engine) : Part("Sample", engine), logger("Sample Part")
 {
-	balls = 2;
+	paddles = 2;
 }
 
 void SamplePart::onStart()
@@ -88,7 +88,7 @@ void SamplePart::onStart()
 			ColliderComponent &brickCollider = ecs.getComponentStore().retrieve<ColliderComponent>(brick);
 			brickCollider.normal = vec3(0, -1, 0);
 			HealthComponent &health = ecs.createComponent<HealthComponent>(brick, 10);
-			ecs.createComponent<ScoreComponent>(brick, 15);
+			ecs.createComponent<ScoreComponent>(brick, 100);
 
 		}
 		y -= 2.5f;
@@ -122,6 +122,7 @@ void SamplePart::onStart()
 	colliderComponent.damping = 1;
 	colliderComponent.colliderType = ColliderType::Sphere;
 	ecs.createComponent<DamageDealerComponent>(ball, 10);
+	ecs.createComponent<HealthComponent>(ball, 100);
 
 	LightSource lightSource1({0, 0, 20}, {0.8, 0.8, 0.8});
 	light1 = ecs.newEntity("Light 1");
@@ -135,6 +136,7 @@ void SamplePart::onStart()
 	TransformComponent &zoneTransform = ecs.createComponent<TransformComponent>(zone);
 	zoneTransform.setPosition(vec3(0, -33, 0));
 	PhysicsComponent &zonePhysics = ecs.createComponent<PhysicsComponent>(zone);
+	ecs.createComponent<DamageDealerComponent>(zone, 100);
 
 	// GlyphLoader glyphLoader(engine.getRenderer(), engine.getRenderer().getAssetSet());
 	// AssetId glyphId = glyphLoader.loadFace("data/fonts/Retroville NC.ttf", 32);
@@ -151,13 +153,15 @@ void SamplePart::onStart()
 
 	Entity gui = ecs.newEntity("gui");
 	ecs.createComponent<GUIComponent>(gui, [this, &scoringSystem] {
-		ImGui::Begin("Breakout Clone");
-		ImGui::Text("%s", fmt::format("Score: {}", scoringSystem.getScore()).c_str());
-		ImGui::Text("%s", fmt::format("Balls: {}", balls).c_str());
-		if (ImGui::Button("Reset Game"))
+		ImGui::Begin("Balls");
 		{
-			scoringSystem.resetScore();
-			balls = 2;
+			ImGui::Text("%s", fmt::format("Score: {}", scoringSystem.getScore()).c_str());
+			ImGui::Text("%s", fmt::format("Paddles: {}", paddles).c_str());
+			if (ImGui::Button("Reset Game"))
+			{
+				scoringSystem.resetScore();
+				paddles = 2;
+			}
 		}
 		ImGui::End();
 	});
