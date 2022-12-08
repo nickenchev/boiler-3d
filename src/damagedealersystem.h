@@ -1,13 +1,14 @@
-#ifndef DAMAGESYSTEM_H
-#define DAMAGESYSTEM_H
+#ifndef DAMAGEDEALERSYSTEM_H
+#define DAMAGEDEALERSYSTEM_H
 
 #include "core/system.h"
 
-class DamageSystem : public Boiler::System
+class DamageDealerSystem : public Boiler::System
 {
 public:
-	DamageSystem();
+	DamageDealerSystem();
+
 	void update(Boiler::Renderer &renderer, Boiler::AssetSet &assetSet, const Boiler::FrameInfo &frameInfo, Boiler::EntityComponentSystem &ecs) override;
 };
 
-#endif /* DAMAGESYSTEM_H */
+#endif /* DAMAGEDEALERSYSTEM_H */

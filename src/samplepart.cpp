@@ -35,6 +35,8 @@
 #include "scoringsystem.h"
 #include "scorecomponent.h"
 #include "healthcomponent.h"
+#include "damagedealercomponent.h"
+#include "damagedealersystem.h"
 
 using namespace Boiler;
 
@@ -48,6 +50,7 @@ void SamplePart::onStart()
 	engine.getRenderer().setClearColor({0, 0, 0});
 
 	engine.getEcs().getComponentSystems().registerSystem<PaddleMovementSystem>(SystemStage::USER_SIMULATION);
+	engine.getEcs().getComponentSystems().registerSystem<DamageDealerSystem>(SystemStage::USER_SIMULATION);
 	engine.getEcs().getComponentSystems().registerSystem<DamageSystem>(SystemStage::USER_SIMULATION);
 	ScoringSystem &scoringSystem = engine.getEcs().getComponentSystems().registerSystem<ScoringSystem>(SystemStage::USER_SIMULATION);
 
@@ -118,6 +121,7 @@ void SamplePart::onStart()
 	colliderComponent.isDynamic = true;
 	colliderComponent.damping = 1;
 	colliderComponent.colliderType = ColliderType::Sphere;
+	ecs.createComponent<DamageDealerComponent>(ball, 10);
 
 	LightSource lightSource1({0, 0, 20}, {0.8, 0.8, 0.8});
 	light1 = ecs.newEntity("Light 1");

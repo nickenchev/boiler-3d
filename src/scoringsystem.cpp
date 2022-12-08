@@ -1,23 +1,28 @@
 #include "scoringsystem.h"
 #include "scorecomponent.h"
-#include "physics/collisioncomponent.h"
 #include "core/entitycomponentsystem.h"
+#include "healthcomponent.h"
 
 using namespace Boiler;
 
 ScoringSystem::ScoringSystem() : System("Scoring System")
 {
 	score = 0;
-
 	expects<ScoreComponent>();
-	expects<CollisionComponent>();
+	expects<HealthComponent>();
 }
 
 void ScoringSystem::update(Renderer &renderer, AssetSet &assetSet, const FrameInfo &frameInfo, EntityComponentSystem &ecs)
 {
 	for (Entity entity : getEntities())
 	{
-		ScoreComponent &scoreComp = ecs.retrieve<ScoreComponent>(entity);
-		score += scoreComp.score;
+		HealthComponent &health = ecs.retrieve<HealthComponent>(entity);
+		if (health.current <= 0)
+		{
+			ScoreComponent &scoreComp = ecs.retrieve<ScoreComponent>(entity);
+			score += scoreComp.score;
+
+			ecs.removeComponent<HealthComponent>(entity);
+		}
 	}
 }

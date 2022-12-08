@@ -14,11 +14,15 @@ add_executable(boiler3d
   src/main.cpp
   src/paddlemovementsystem.h
   src/paddlemovementsystem.cpp
+  src/damagedealersystem.h
+  src/damagedealersystem.cpp
   src/damagesystem.h
   src/damagesystem.cpp
   src/scorecomponent.h
   src/scoringsystem.h
   src/scoringsystem.cpp
+  src/damagedealercomponent.h
+  src/damagecomponent.h
   src/samplepart.h
   src/samplepart.cpp)
 
